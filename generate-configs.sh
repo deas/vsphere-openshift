@@ -8,7 +8,7 @@ cp install-config.yaml openshift/
 cd openshift
 
 # create kubernetes manifests
-$HOME/cc-bin/openshift-install create manifests
+openshift-install create manifests
 
 # ensure masters are not schedulable
 if [ `uname` = 'Linux' ] ; then 
