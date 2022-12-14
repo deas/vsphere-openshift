@@ -4,10 +4,10 @@ vc_ds      = "LocalDS_0"
 vc_network = "VM Network"
 
 dns     = ["10.101.2.1", "10.111.2.1", "10.101.2.2"]
-gateway = "10.126.20.1" # TODO ?
+gateway = "10.126.20.1"
 # loadbalancer_ip = "192.168.5.160"
 proxy_hosts = ["http://...:8080", "https://...:8080"]
-ntp_servers = ["dns_name_1", "dns_name_2"]
+ntp_servers = ["dns_name_1", "dns_name_2"] # TODO
 
 # "vlan_id" = 1263
 machine_cidr = "10.126.20.0/24"
@@ -25,6 +25,7 @@ storage_nodes = {
   "disk_size" = 128
   "memory"    = 32768 # TODO: 38 # ??
   "num_cpu"   = 10
+  "slug"      = "storage"
   "ips"       = ["10.126.20.8", "10.126.20.9", "10.126.20.10"]
 }
 
@@ -32,6 +33,7 @@ worker_nodes = {
   "disk_size" = 128
   "memory"    = 32768
   "num_cpu"   = 4
+  "slug"      = "default"
   "ips"       = ["10.126.20.32", "10.126.20.33", "10.126.20.34"]
 }
 

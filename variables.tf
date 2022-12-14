@@ -11,8 +11,7 @@ variable "vc_ds" {
 }
 
 variable "vc_network" {
-  type    = string
-  default = "VM Network"
+  type = string
 }
 
 ###########################
@@ -107,6 +106,7 @@ variable "worker_nodes" {
     disk_size = number
     memory    = number
     num_cpu   = number
+    slug      = string
     ips       = list(string)
   })
   default = null
@@ -117,6 +117,7 @@ variable "storage_nodes" {
     disk_size = number
     memory    = number
     num_cpu   = number
+    slug      = string
     ips       = list(string)
   })
   default = null

@@ -1,0 +1,36 @@
+# https://docs.openshift.com/container-platform/4.11/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html
+apiVersion: v1
+baseDomain: ${cluster_domain}
+#proxy:
+#  httpProxy: http://<username>:<pswd>@<ip>:<port> 
+#  httpsProxy: ${httpsProxy} # https://<username>:<pswd>@<ip>:<port> 
+#  noProxy: example.com 
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: ocp4
+platform:
+  vsphere:
+    vcenter: ${vc}
+    username: ${vc_username} # administrator@vsphere.lan
+    password: ${vc_password}
+    datacenter: ${vc_datacenter}
+    defaultDatastore: ${vc_defaultDatastore}
+    #apiVIP: 128.0.0.1 # The virtual IP (VIP) address that you configured for control plane API access.
+    #ingressVIP: 129.0.0.1 # The virtual IP (VIP) address that you configured for cluster ingress.
+    #vcenter: 192.168.1.240
+    #username: administrator@vsphere.lan
+    #password: supersecretpassword
+    #datacenter: ktzdc
+    #defaultDatastore: nvme
+fips: false
+# The pullSecret configuration setting contains a copy of the pull secret downloaded from the Install OpenShift on Bare Metal page when preparing the provisioner node. 
+pullSecret: '${pullSecret}'
+# The sshKey configuration setting contains the key in the ~/.ssh/id_rsa.pub file required to access the control plane nodes and worker nodes. Typically, this key is from the provisioner node.
+sshKey: '${sshKey}'

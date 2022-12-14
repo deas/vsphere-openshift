@@ -33,4 +33,6 @@ openshift/
 install-config.yaml
 .vscode
 bin/
-
+*.pem
+pull-secret.json
+terraform.tfvars
