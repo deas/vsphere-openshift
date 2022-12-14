@@ -1,22 +1,24 @@
-# TODO
 vc_dc      = "DC0"
 vc_cluster = "DC0_C0"
 vc_ds      = "LocalDS_0"
 vc_network = "VM Network"
 
-dns     = "192.168.5.169"
-gateway = "10.126.20.254" # TODO ?
+dns     = ["10.101.2.1", "10.111.2.1", "10.101.2.2"]
+gateway = "10.126.20.1" # TODO ?
 # loadbalancer_ip = "192.168.5.160"
+proxy_hosts = ["http://...:8080", "https://...:8080"]
+ntp_servers = ["dns_name_1", "dns_name_2"]
+
 # "vlan_id" = 1263
 machine_cidr = "10.126.20.0/24"
 netmask      = "255.255.255.0"
-bootstrap_ip = "10.126.20.2"
+bootstrap_ip = "10.126.20.4"
 
 master_nodes = {
   "disk_size" = 128
   "memory"    = 16384
   "num_cpu"   = 4
-  "ips"       = ["10.126.20.3", "10.126.20.4", "10.126.20.5"]
+  "ips"       = ["10.126.20.5", "10.126.20.6", "10.126.20.7"]
 }
 
 storage_nodes = {

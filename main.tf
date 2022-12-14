@@ -36,7 +36,7 @@ module "master" {
 
   cluster_domain = var.cluster_domain
   machine_cidr   = var.machine_cidr
-  dns_address    = var.dns # var.local_dns
+  dns_address    = var.dns[0] # TODO var.local_dns
   gateway        = var.gateway
   ipv4_address   = var.master_nodes.ips[count.index]
   netmask        = var.netmask
@@ -63,7 +63,7 @@ module "worker" {
 
   cluster_domain = var.cluster_domain
   machine_cidr   = var.machine_cidr
-  dns_address    = var.dns # local_dns
+  dns_address    = var.dns[0] # TODO var.local_dns
   gateway        = var.gateway
   ipv4_address   = local.all_worker_nodes[count.index].ipv4_address
   netmask        = var.netmask
@@ -90,7 +90,7 @@ module "bootstrap" {
 
   cluster_domain = var.cluster_domain
   machine_cidr   = var.machine_cidr
-  dns_address    = var.dns # local_dns
+  dns_address    = var.dns[0] # TODO var.local_dns
   gateway        = var.gateway
   ipv4_address   = var.bootstrap_ip
   netmask        = var.netmask

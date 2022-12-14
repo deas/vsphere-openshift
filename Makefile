@@ -1,7 +1,14 @@
-oc_base_version=4.11
-oc_full_version=$(oc_base_version).9
 ds=DC0
 vsphere_folder=templates
+oc_base_version=4.11
+oc_full_version=$(oc_base_version).9
+BIN_PATH=$(shell pwd)/bin
+
+.PHONY: install-oc-tools
+
+install-oc-tools:
+	BIN_PATH=$(BIN_PATH) ./install-oc-tools.sh --version $(oc_full_version)
+#	./install-oc-tools.sh --latest $(oc_base_version)
 
 tfinit:
 	terraform init

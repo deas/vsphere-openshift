@@ -32,4 +32,5 @@ override.tf.json
 openshift/
 install-config.yaml
 .vscode
+bin/
 
