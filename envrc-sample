@@ -1,0 +1,9 @@
+# GOVC_URL=https://user:pass@172.17.0.2:8989/sdk
+export VSPHERE_USER=user
+export VSPHERE_PASSWORD=pass
+export VSPHERE_SERVER=127.0.0.1:8989
+export VSPHERE_ALLOW_UNVERIFIED_SSL=1
+export GOVC_URL=https://user:pass@127.0.0.1:8989/sdk
+export GOVC_SIM_PID=1
+export GOVC_INSECURE=1
+# export VSPHERE_VIM_KEEP_ALIVE=
