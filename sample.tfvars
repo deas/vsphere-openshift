@@ -43,9 +43,3 @@ vmware_folder = "redhat/openshift"
 rhcos_template = "DC0_H0_VM0"
 cluster_slug   = "mgmt"
 cluster_domain = "openshift.lab.int" # TODO
-
-## Expects `openshift-install create ignition-configs` to have been run
-## probably via generate-configs.sh
-bootstrap_ignition_path = "./openshift/bootstrap.ign"
-master_ignition_path    = "./openshift/master.ign"
-worker_ignition_path    = "./openshift/worker.ign"

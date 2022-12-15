@@ -77,8 +77,19 @@ variable "ignition" {
 ## Machine variables
 # Keeping those ignition paths as vars as we might want to delegate this to another module
 
-variable "ignition_path" {
-  type = string
+variable "bootstrap_ignition_path" {
+  type    = string
+  default = "openshift/bootstrap.ign"
+}
+
+variable "master_ignition_path" {
+  type    = string
+  default = "openshift/master.ign"
+}
+
+variable "worker_ignition_path" {
+  type    = string
+  default = "openshift/worker.ign"
 }
 
 variable "master_nodes" {

@@ -4,9 +4,7 @@ This repo contains code to deploy Openshift 4 for my homelab. It focuses on UPI 
 
 ## Pre-reqs
 
-On a Mac you will need to install a few packages via `brew`.
-
-    brew install jq watch gsed
+jq, govc, watch
 
 ## Usage
 
@@ -16,7 +14,7 @@ On a Mac you will need to install a few packages via `brew`.
 0. TODO .envrc
 1. Configure DNS - https://blog.ktz.me/configure-unbound-dns-for-openshift-4/ - if using CoreDNS this is optional.
 3. Customize `terraform.tfvars` with any relevant configuration.
-4. Run `make init` to initialise Terraform modules
+4. Run `make init` to initialize
 5. Run `make apply` to create the VMs and generate/install ignition configs
 6. Monitor install progress with `make wait-for-bootstrap`
 7. Check and approve pending CSRs with `make get-csr` and `make approve-csr`

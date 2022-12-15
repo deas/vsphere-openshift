@@ -1,3 +1,5 @@
+# openshift-install explain installconfig  
+#
 # https://docs.openshift.com/container-platform/4.11/installing/installing_bare_metal_ipi/ipi-install-installation-workflow.html
 apiVersion: v1
 baseDomain: ${cluster_domain}
@@ -8,13 +10,13 @@ baseDomain: ${cluster_domain}
 compute:
 - hyperthreading: Enabled
   name: worker
-  replicas: 0
+  replicas: 0 # TODO : Length from terroform?
 controlPlane:
   hyperthreading: Enabled
   name: master
-  replicas: 3
+  replicas: 3  # TODO : Length from terroform?
 metadata:
-  name: ocp4
+  name: ${name}
 platform:
   vsphere:
     vcenter: ${vc}
@@ -22,13 +24,14 @@ platform:
     password: ${vc_password}
     datacenter: ${vc_datacenter}
     defaultDatastore: ${vc_defaultDatastore}
-    #apiVIP: 128.0.0.1 # The virtual IP (VIP) address that you configured for control plane API access.
-    #ingressVIP: 129.0.0.1 # The virtual IP (VIP) address that you configured for cluster ingress.
-    #vcenter: 192.168.1.240
-    #username: administrator@vsphere.lan
-    #password: supersecretpassword
-    #datacenter: ktzdc
-    #defaultDatastore: nvme
+    # https://docs.openshift.com/container-platform/4.11/installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.html
+    # apiVIP: 128.0.0.1 # The virtual IP (VIP) address that you configured for control plane API access.
+    # ingressVIP: 129.0.0.1 # The virtual IP (VIP) address that you configured for cluster ingress.
+    # vcenter: 192.168.1.240
+    # username: administrator@vsphere.lan
+    # password: supersecretpassword
+    # datacenter: ktzdc
+    # defaultDatastore: nvme
 fips: false
 # The pullSecret configuration setting contains a copy of the pull secret downloaded from the Install OpenShift on Bare Metal page when preparing the provisioner node. 
 pullSecret: '${pullSecret}'

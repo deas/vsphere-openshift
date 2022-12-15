@@ -1,28 +1,26 @@
 #!/bin/sh
+# TODO Get rid of me
 # A helper script for openshift-install
 
-## ignition creation prep
-rm -rf openshift/
-mkdir -p openshift
-cp install-config.yaml openshift/
-cd openshift
+set -e
 
 # create kubernetes manifests
-openshift-install create manifests
+openshift-install create manifests --log-level debug
 
+# TODO Needed?
 # ensure masters are not schedulable
 if [ `uname` = 'Linux' ] ; then 
-sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
+    sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 else 
 # macos sed will fail, this script requires `brew install gnu-sed`
-gsed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
+    gsed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml
 fi
 
-## delete machines and machinesets
-# rm -f openshift/99_openshift-cluster-api_worker-machineset-0.yaml
-# rm -f openshift/99_openshift-cluster-api_master-machines-0.yaml
-# rm -f openshift/99_openshift-cluster-api_master-machines-1.yaml
-# rm -f openshift/99_openshift-cluster-api_master-machines-2.yaml
+## delete machines and machinesets - because terraform
+rm -f openshift/99_openshift-cluster-api_worker-machineset-0.yaml
+rm -f openshift/99_openshift-cluster-api_master-machines-0.yaml
+rm -f openshift/99_openshift-cluster-api_master-machines-1.yaml
+rm -f openshift/99_openshift-cluster-api_master-machines-2.yaml
 
 ## ignition config creation
-$HOME/cc-bin/openshift-install create ignition-configs --log-level debug
+openshift-install create ignition-configs --log-level debug
