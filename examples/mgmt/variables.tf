@@ -52,25 +52,6 @@ provider "vsphere" {
 }
 */
 
-data "vsphere_datacenter" "dc" {
-  name = var.vc_dc
-}
-
-data "vsphere_compute_cluster" "cluster" {
-  name          = var.vc_cluster
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_network" "network" {
-  name          = var.vc_network
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_datastore" "nvme" {
-  name          = var.vc_ds
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
 ##########
 ## Ignition
 

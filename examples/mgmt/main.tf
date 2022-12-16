@@ -1,6 +1,25 @@
+data "vsphere_datacenter" "dc" {
+  name = var.vc_dc
+}
+
+data "vsphere_compute_cluster" "cluster" {
+  name          = var.vc_cluster
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_network" "network" {
+  name          = var.vc_network
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_datastore" "nvme" {
+  name          = var.vc_ds
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
 module "cluster" {
   source          = "../.."
-  ignition_path   = "${path.module}/openshift"
+  ignition_path   = "${path.module}/${data.external.ignition.result.path}"
   vc_dc           = var.vc_dc
   vc_cluster      = var.vc_cluster
   vc_ds           = var.vc_ds
@@ -20,6 +39,7 @@ module "cluster" {
   cos_template    = var.cos_template
   cluster_slug    = var.cluster_slug
   cluster_domain  = var.cluster_domain
+  # depends_on      = [data.external.ignition_files]
 }
 
 resource "tls_private_key" "ssh" {
@@ -38,13 +58,12 @@ data "template_file" "install_config" {
   template = file("../../install-config-tmpl.yaml")
   vars = {
     cluster_domain = "${var.cluster_domain}"
-    # TODO : Do does the ocp4 installer even need those?
-    # If so, we should pull them from the environment
+    # TODO: We should pull them from the environment
     vc                  = "127.0.0.1"
     vc_username         = "user"
     vc_password         = "pass"
-    vc_datacenter       = var.vc_dc # "DC0"
-    vc_defaultDatastore = var.vc_ds # "LocalDS_0"
+    vc_datacenter       = var.vc_dc
+    vc_defaultDatastore = var.vc_ds
     name                = var.cluster_slug
     pullSecret          = data.local_file.pull_secret.content
     sshKey              = tls_private_key.ssh.public_key_openssh
@@ -65,7 +84,18 @@ data "local_file" "pull_secret" {
   filename = var.pull_secret
 }
 
-resource "null_resource" "ocp4_config" {
+data "external" "ignition" {
+  program = ["sh", "-c", "rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{\"path\":\"openshift\"}'"]
+  # program    = ["sh", "-c", "rm -rf *.ign && ../../../generate-configs.sh && echo '{\"path\":\"openshift\"}'"]
+  depends_on  = [local_file.install_config]
+  working_dir = "openshift"
+  # query = {
+  #  id = "abc123"
+  #}
+}
+
+/*
+resource "null_resource" "openshift_config" {
   #triggers = {
   #  always_run = "${timestamp()}"
   #  # file_changed = md5(local_file.backup_file.content)
@@ -81,6 +111,7 @@ resource "null_resource" "ocp4_config" {
     local_file.install_config
   ]
 }
+*/
 
 # ED25519 key - appears preferred by openshift
 resource "tls_private_key" "ed25519" {
@@ -113,6 +144,18 @@ resource "tls_cert_request" "apps" {
   subject {
     common_name  = "*.apps.${var.cluster_slug}.${var.cluster_domain}"
     organization = "ACME Examples, Inc"
+  }
+}
+
+/*
+output "openshift_config" {
+  value = null_resource.openshift_config.id
+}
+*/
+
+output "cluster" {
+  value = {
+    "kubeconfig" = module.cluster.kubeconfig
   }
 }
 
