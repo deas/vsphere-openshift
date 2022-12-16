@@ -1,3 +1,8 @@
+variable "pull_secret" {
+  type = string
+  # https://github.com/okd-project/okd/issues/182
+  default = "../../pull-secret-fake.json"
+}
 variable "vc_dc" {
   type = string
 }
@@ -32,8 +37,14 @@ variable "bootstrap_complete" {
 ################
 ## VMware vars - unlikely to need to change between releases of OCP
 
-variable "rhcos_template" {
+variable "cos_template" {
   type = string
+}
+
+variable "openshift_gen" {
+  type = string
+  # default = "touch openshift/bootstrap.ign && touch openshift/master.ign && touch openshift/worker.ign"
+  default = "cd openshift && ../../../generate-configs.sh"
 }
 
 /*
@@ -68,7 +79,17 @@ data "vsphere_datastore" "nvme" {
 #  version = "1.2.1"
 #}
 
-variable "ignition" {
+#variable "ignition" {
+#  type    = string
+#  default = ""
+#}
+
+variable "https_proxy" {
+  type    = string
+  default = ""
+}
+
+variable "no_proxy" {
   type    = string
   default = ""
 }

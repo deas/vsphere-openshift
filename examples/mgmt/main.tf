@@ -17,10 +17,9 @@ module "cluster" {
   storage_nodes   = var.storage_nodes
   worker_nodes    = var.worker_nodes
   vmware_folder   = var.vmware_folder
-  rhcos_template  = var.rhcos_template
+  cos_template    = var.cos_template
   cluster_slug    = var.cluster_slug
   cluster_domain  = var.cluster_domain
-  // sshKey              = tls_private_key.ssh.public_key_openssh
 }
 
 resource "tls_private_key" "ssh" {
@@ -34,7 +33,7 @@ output "openssh_private_key" {
   sensitive = true
 }
 
-
+# TODO: Duplication - but for now we are kicking off the openshift-install generation here 
 data "template_file" "install_config" {
   template = file("../../install-config-tmpl.yaml")
   vars = {
@@ -49,7 +48,10 @@ data "template_file" "install_config" {
     name                = var.cluster_slug
     pullSecret          = data.local_file.pull_secret.content
     sshKey              = tls_private_key.ssh.public_key_openssh
-    httpsProxy          = "127.0.0.1"
+    httpsProxy          = var.https_proxy # http://<username>:<pswd>@<ip>:<port>
+    noProxy             = var.no_proxy
+    apiVIP              = "fix.me" # TODO
+    ingressVIP          = "fix.me" # TODO
   }
 }
 
@@ -60,7 +62,7 @@ resource "local_file" "install_config" {
 }
 
 data "local_file" "pull_secret" {
-  filename = "${path.module}/pull-secret.json"
+  filename = var.pull_secret
 }
 
 resource "null_resource" "ocp4_config" {
@@ -72,13 +74,53 @@ resource "null_resource" "ocp4_config" {
 
   provisioner "local-exec" {
     command = <<EOT
-      cd openshift && ../../../generate-configs.sh
+      ${var.openshift_gen}
     EOT
   }
   depends_on = [
     local_file.install_config
   ]
 }
+
+# ED25519 key - appears preferred by openshift
+resource "tls_private_key" "ed25519" {
+  algorithm = "ED25519"
+}
+
+resource "tls_cert_request" "api" {
+  private_key_pem = tls_private_key.ed25519.private_key_pem
+  # file("private_key.pem")
+  # private_key_pem = file("private_key.pem")
+
+  subject {
+    common_name  = "api.${var.cluster_slug}.${var.cluster_domain}"
+    organization = "ACME Examples, Inc"
+  }
+}
+
+resource "tls_cert_request" "api-int" {
+  private_key_pem = tls_private_key.ed25519.private_key_pem
+
+  subject {
+    common_name  = "api-int.${var.cluster_slug}.${var.cluster_domain}"
+    organization = "ACME Examples, Inc"
+  }
+}
+
+resource "tls_cert_request" "apps" {
+  private_key_pem = tls_private_key.ed25519.private_key_pem
+
+  subject {
+    common_name  = "*.apps.${var.cluster_slug}.${var.cluster_domain}"
+    organization = "ACME Examples, Inc"
+  }
+}
+
+/*
+output tls_private_key {
+  value = tls_private_key.ed25519.private_key_pem
+}
+*/
 
 
 # RSA key of size 4096 bits

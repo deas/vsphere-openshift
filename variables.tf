@@ -32,7 +32,7 @@ variable "bootstrap_complete" {
 ################
 ## VMware vars - unlikely to need to change between releases of OCP
 
-variable "rhcos_template" {
+variable "cos_template" {
   type = string
 }
 
@@ -68,10 +68,10 @@ data "vsphere_datastore" "nvme" {
 #  version = "1.2.1"
 #}
 
-variable "ignition" {
-  type    = string
-  default = ""
-}
+#variable "ignition" {
+#  type    = string
+#  default = ""
+#}
 
 #########
 ## Machine variables
@@ -114,13 +114,11 @@ variable "storage_nodes" {
 }
 
 variable "bootstrap_ip" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "loadbalancer_ip" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "cluster_domain" {

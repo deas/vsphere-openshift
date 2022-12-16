@@ -1,10 +1,13 @@
 VC_DS=DC0
 VC_IMPORT_FOLDER=templates
-OC_BASE_VERSION=4.11
-OC_FULL_VERSION=$(OC_BASE_VERSION).9
 OC_CONFIG_DIR=./openshift
-
-.PHONY: install-oc-tools
+OS_NAME=fcos
+FCOS_FULL_VERSION=37.20221127.3.0
+OS_IMG_URL=https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/$(FCOS_FULL_VERSION)/x86_64/fedora-coreos-$(FCOS_FULL_VERSION)-vmware.x86_64.ova
+# OS_NAME=rhcos
+# RHCOS_BASE_VERSION=4.11
+# RHCOS_FULL_VERSION=$(RHCOS_BASE_VERSION).9
+# OS_IMG_URL=https://mirror.openshift.com/pub/openshift-v4/dependencies/$(RHCOS_BASE_VERSION)/$(RHCOS_FULL_VERSION)/rhcos-vmware.x86_64.ova
 
 init:
 	terraform init
@@ -57,7 +60,7 @@ approve-csr:
 		xargs oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig adm certificate approve
 
 import-ova:
-	govc import.ova --folder=$(VC_IMPORT_FOLDER) --ds=$(VC_DS) --name=rhcos-$(OC_FULL_VERSION) https://mirror.openshift.com/pub/openshift-v4/dependencies/$(OC_BASE_VERSION)/$(OC_FULL_VERSION)/rhcos-vmware.x86_64.ova
+	govc import.ova --folder=$(VC_IMPORT_FOLDER) --ds=$(VC_DS) --name=$(OS_NAME)-$(OC_FULL_VERSION) $(OS_IMG_URL)
 
 #kraken:
 #	docker run --name=kraken --net=host -v /Users/alex/git/ib/ocp4/openshift/auth/kubeconfig:/root/.kube/config -v /Users/alex/git/ib/ocp4/kraken/config/config.yaml:/root/kraken/config/config.yaml -d quay.io/openshift-scale/kraken:latest

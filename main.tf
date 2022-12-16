@@ -7,17 +7,17 @@ locals {
       "slug"      = nodes.slug
       "ipv4_address" = addr }
   ] if nodes != null])
-
+  dns_address = join(":", var.dns)
 }
 
 data "vsphere_virtual_machine" "template" {
-  name          = var.rhcos_template
+  name          = var.cos_template
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-
+# TODO We should allow dynamic / consolidate cos modules
 module "master" {
-  source    = "./modules/rhcos-static"
+  source    = "./modules/cos-static"
   count     = length(var.master_nodes.ips)
   name      = "${var.cluster_slug}-master-${count.index + 1}"
   folder    = vsphere_folder.folder.path
@@ -37,16 +37,14 @@ module "master" {
 
   cluster_domain = var.cluster_domain
   machine_cidr   = var.machine_cidr
-  dns_address    = var.dns[0]
-  # TODO var.local_dns
-  gateway      = var.gateway
-  ipv4_address = var.master_nodes.ips[count.index]
-  netmask      = var.netmask
-  // depends_on   = [null_resource.ocp4_config]
+  dns_address    = local.dns_address
+  gateway        = var.gateway
+  ipv4_address   = var.master_nodes.ips[count.index]
+  netmask        = var.netmask
 }
 
 module "worker" {
-  source    = "./modules/rhcos-static"
+  source    = "./modules/cos-static"
   count     = length(local.all_worker_nodes)
   name      = "${var.cluster_slug}-wrk-${local.all_worker_nodes[count.index].slug}-${count.index + 1}"
   folder    = vsphere_folder.folder.path
@@ -66,16 +64,14 @@ module "worker" {
 
   cluster_domain = var.cluster_domain
   machine_cidr   = var.machine_cidr
-  dns_address    = var.dns[0] # TODO var.local_dns
+  dns_address    = local.dns_address
   gateway        = var.gateway
   ipv4_address   = local.all_worker_nodes[count.index].ipv4_address
   netmask        = var.netmask
-  // depends_on     = [null_resource.ocp4_config]
-
 }
 
 module "bootstrap" {
-  source    = "./modules/rhcos-static"
+  source    = "./modules/cos-static"
   count     = var.bootstrap_complete ? 0 : 1
   name      = "${var.cluster_slug}-bootstrap"
   folder    = vsphere_folder.folder.path
@@ -95,11 +91,10 @@ module "bootstrap" {
 
   cluster_domain = var.cluster_domain
   machine_cidr   = var.machine_cidr
-  dns_address    = var.dns[0] # TODO var.local_dns
+  dns_address    = local.dns_address
   gateway        = var.gateway
   ipv4_address   = var.bootstrap_ip
   netmask        = var.netmask
-  // depends_on     = [null_resource.ocp4_config]
 }
 
 # TODO: Needs Parent folder
@@ -110,141 +105,7 @@ module "bootstrap" {
 #}
 
 resource "vsphere_folder" "folder" {
-  path          = "foo" // ${var.vmware_folder}/${var.cluster_slug}"
+  path          = "foo" // TODO ${var.vmware_folder}/${var.cluster_slug}"
   type          = "vm"
   datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "local_file" "pull_secret" {
-  filename = "${path.module}/pull-secret.json"
-}
-
-data "template_file" "install_config" {
-  template = file("${path.module}/install-config-tmpl.yaml")
-  vars = {
-    cluster_domain = "${var.cluster_domain}"
-    # TODO : Do does the ocp4 installer even need those?
-    # If so, we should pull them from the environment
-    vc                  = "127.0.0.1"
-    vc_username         = "user"
-    vc_password         = "pass"
-    vc_datacenter       = var.vc_dc # "DC0"
-    vc_defaultDatastore = var.vc_ds # "LocalDS_0"
-    name                = var.cluster_slug
-    pullSecret          = data.local_file.pull_secret.content
-    sshKey              = tls_private_key.ssh.public_key_openssh
-    httpsProxy          = "127.0.0.1"
-  }
-}
-
-resource "local_file" "install_config" {
-  content         = data.template_file.install_config.rendered
-  file_permission = 0644
-  filename        = "${path.module}/openshift/install-config.yaml"
-}
-
-# RSA key of size 4096 bits
-#resource "tls_private_key" "rsa" {
-#  algorithm = "RSA"
-#  rsa_bits  = 4096
-#}
-
-# ED25519 key - appears preferred by openshift
-resource "tls_private_key" "ed25519" {
-  algorithm = "ED25519"
-}
-
-resource "tls_cert_request" "api" {
-  private_key_pem = tls_private_key.ed25519.private_key_pem
-  # file("private_key.pem")
-  # private_key_pem = file("private_key.pem")
-
-  subject {
-    common_name  = "api.${var.cluster_slug}.${var.cluster_domain}"
-    organization = "ACME Examples, Inc"
-  }
-}
-
-resource "tls_cert_request" "api-int" {
-  private_key_pem = tls_private_key.ed25519.private_key_pem
-
-  subject {
-    common_name  = "api-int.${var.cluster_slug}.${var.cluster_domain}"
-    organization = "ACME Examples, Inc"
-  }
-}
-
-resource "tls_cert_request" "apps" {
-  private_key_pem = tls_private_key.ed25519.private_key_pem
-
-  subject {
-    common_name  = "*.apps.${var.cluster_slug}.${var.cluster_domain}"
-    organization = "ACME Examples, Inc"
-  }
-}
-
-# TODO
-# API: api.$name.$basedomain + api-int.$name.$basedomain
-# Ingress: *.apps.$name.$basedomain
-
-# openssl req -noout -text -in csr-api.pem
-/*
-resource "local_file" "csr-api" {
-  content         = tls_cert_request.api.cert_request_pem
-  file_permission = 0644
-  filename        = "${path.module}/csr-api.pem"
-}
-
-resource "local_file" "csr-api-int" {
-  content         = tls_cert_request.api-int.cert_request_pem
-  file_permission = 0644
-  filename        = "${path.module}/csr-api-int.pem"
-}
-
-resource "local_file" "csr-apps" {
-  content         = tls_cert_request.apps.cert_request_pem
-  file_permission = 0644
-  filename        = "${path.module}/csr-apps.pem"
-}
-*/
-
-resource "tls_private_key" "ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-/*
-// terraform output -raw openssh_private_key
-output "openssh_private_key" {
-  value     = tls_private_key.ssh.private_key_openssh
-  sensitive = true
-}
-
-resource "null_resource" "ocp4_config" {
-  #triggers = {
-  #  always_run = "${timestamp()}"
-  #  # file_changed = md5(local_file.backup_file.content)
-  #  # value = var.some_id
-  #}
-
-  provisioner "local-exec" {
-    command = <<EOT
-      cd openshift && ../generate-configs.sh
-    EOT
-  }
-  depends_on = [
-    local_file.install_config
-  ]
-}
-*/
-
-output "apps-csr" {
-  value = tls_cert_request.apps.cert_request_pem
-}
-
-output "api-csr" {
-  value = tls_cert_request.api.cert_request_pem
-}
-
-output "api-int-csr" {
-  value = tls_cert_request.api.cert_request_pem
 }
