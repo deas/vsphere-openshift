@@ -19,7 +19,7 @@ func TestClusters(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	By("bootstrapping test environment")
-	vcSim = exec.Command("vcsim") //, "a-z", "A-Z")
+	vcSim = exec.Command("vcsim")
 	stdout, err := vcSim.StdoutPipe()
 	Expect(err).NotTo(HaveOccurred())
 	err = vcSim.Start()
