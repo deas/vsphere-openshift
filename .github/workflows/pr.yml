@@ -1,0 +1,40 @@
+name: Pull Request
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  validate:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Setup Terraform # TODO Should probably push this down to Go
+      uses: hashicorp/setup-terraform@v1
+      with:
+        # https://github.com/gruntwork-io/terratest/issues/706#issuecomment-733495166
+        terraform_wrapper: false
+    - name: Setup Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.17.0'
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+    - name: Check Format
+      run: make fmt
+    - name: Lint
+      run: make vet
+    - name: Run tests
+      run: |
+        make test

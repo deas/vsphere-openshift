@@ -21,3 +21,4 @@ jq, govc, watch
 8. Run `make bootstrap-complete` to destroy the bootstrap VM
 9. Run `make wait-for-install` and wait for the cluster install to complete
 10. Enjoy!
+```

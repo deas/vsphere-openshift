@@ -11,9 +11,6 @@ OS_IMG_URL=https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/$(
 
 init:
 	terraform init
-#   TODO: Not beautiful 	
-	terraform apply -auto-approve --target local_file.install_config 
-	terraform apply -auto-approve --target null_resource.ocp4_config
 
 apply:
 	terraform apply -auto-approve

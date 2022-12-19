@@ -36,3 +36,5 @@ bin/
 *.pem
 pull-secret.json
 terraform.tfvars
+.terraform.lock.hcl
+cover.out
