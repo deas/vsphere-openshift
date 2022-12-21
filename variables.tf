@@ -14,14 +14,14 @@ variable "vc_network" {
   type = string
 }
 
+variable "vc_vm_folder" {
+  type = string
+}
+
 ###########################
 ## OCP Cluster Vars
 
 variable "cluster_slug" {
-  type = string
-}
-
-variable "vmware_folder" {
   type = string
 }
 
@@ -40,25 +40,6 @@ variable "cos_template" {
 provider "vsphere" {
 }
 */
-
-data "vsphere_datacenter" "dc" {
-  name = var.vc_dc
-}
-
-data "vsphere_compute_cluster" "cluster" {
-  name          = var.vc_cluster
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_network" "network" {
-  name          = var.vc_network
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_datastore" "nvme" {
-  name          = var.vc_ds
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
 
 ##########
 ## Ignition
@@ -115,6 +96,21 @@ variable "storage_nodes" {
 
 variable "bootstrap_ip" {
   type = string
+}
+
+
+variable "bootstrap_disk_size" {
+  type    = number
+  default = 40
+}
+
+variable "bootstrap_memory" {
+  type    = number
+  default = 8192
+}
+variable "bootstrap_num_cpu" {
+  type    = number
+  default = 4 # 16 ? WTF?
 }
 
 variable "loadbalancer_ip" {

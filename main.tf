@@ -10,6 +10,25 @@ locals {
   dns_address = join(":", var.dns)
 }
 
+data "vsphere_datacenter" "dc" {
+  name = var.vc_dc
+}
+
+data "vsphere_compute_cluster" "cluster" {
+  name          = var.vc_cluster
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_network" "network" {
+  name          = var.vc_network
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_datastore" "nvme" {
+  name          = var.vc_ds
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
 data "vsphere_virtual_machine" "template" {
   name          = var.cos_template
   datacenter_id = data.vsphere_datacenter.dc.id
@@ -20,7 +39,7 @@ module "master" {
   source    = "./modules/cos-static"
   count     = length(var.master_nodes.ips)
   name      = "${var.cluster_slug}-master-${count.index + 1}"
-  folder    = vsphere_folder.folder.path
+  folder    = var.vc_vm_folder
   datastore = data.vsphere_datastore.nvme.id
   disk_size = var.master_nodes.disk_size
   memory    = var.master_nodes.memory
@@ -47,7 +66,7 @@ module "worker" {
   source    = "./modules/cos-static"
   count     = length(local.all_worker_nodes)
   name      = "${var.cluster_slug}-wrk-${local.all_worker_nodes[count.index].slug}-${count.index + 1}"
-  folder    = vsphere_folder.folder.path
+  folder    = var.vc_vm_folder
   datastore = data.vsphere_datastore.nvme.id
   disk_size = local.all_worker_nodes[count.index].disk_size
   memory    = local.all_worker_nodes[count.index].memory
@@ -74,11 +93,11 @@ module "bootstrap" {
   source    = "./modules/cos-static"
   count     = var.bootstrap_complete ? 0 : 1
   name      = "${var.cluster_slug}-bootstrap"
-  folder    = vsphere_folder.folder.path
+  folder    = var.vc_vm_folder
   datastore = data.vsphere_datastore.nvme.id
-  disk_size = 40
-  memory    = 8192
-  num_cpu   = 4 # 16 ? WTF?
+  disk_size = var.bootstrap_disk_size
+  memory    = var.bootstrap_memory
+  num_cpu   = var.bootstrap_num_cpu
   ignition  = "${var.ignition_path}/bootstrap.ign"
 
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
@@ -96,19 +115,13 @@ module "bootstrap" {
   ipv4_address   = var.bootstrap_ip
   netmask        = var.netmask
 }
-
-# TODO: Needs Parent folder
-#resource "vsphere_folder" "folder" {
-#  path          = "${var.vmware_folder}/${var.cluster_slug}"
-#  type          = "vm"
-#  datacenter_id = data.vsphere_datacenter.dc.id
-#}
-
+/*
 resource "vsphere_folder" "folder" {
-  path          = "foo" // TODO ${var.vmware_folder}/${var.cluster_slug}"
+  path          = "${var.vm_root_folder}/${var.cluster_slug}"
   type          = "vm"
   datacenter_id = data.vsphere_datacenter.dc.id
 }
+*/
 
 output "kubeconfig" {
   value = "dummy"

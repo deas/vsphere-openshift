@@ -5,6 +5,8 @@ vc_cluster = "DC0_C0"
 vc_ds      = "LocalDS_0"
 vc_network = "VM Network"
 
+ignition_gen = ["sh", "-c", "rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{\"path\":\"openshift\"}'"]
+
 dns     = ["10.101.2.1", "10.111.2.1", "10.101.2.2"]
 gateway = "10.126.20.1"
 # loadbalancer_ip = "192.168.5.160"
@@ -40,7 +42,7 @@ worker_nodes = {
 }
 
 ## Cluster configuration
-vmware_folder = "redhat/openshift"
+vm_folder = "okd"
 # rhcos_template = "rhcos-4.9.0" # TODO
 cos_template   = "DC0_H0_VM0"
 cluster_slug   = "mgmt"

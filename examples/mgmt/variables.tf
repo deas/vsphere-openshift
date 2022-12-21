@@ -26,7 +26,7 @@ variable "cluster_slug" {
   type = string
 }
 
-variable "vmware_folder" {
+variable "vm_folder" {
   type = string
 }
 
@@ -75,9 +75,10 @@ variable "no_proxy" {
   default = ""
 }
 
-#########
-## Machine variables
-# Keeping those ignition paths as vars as we might want to delegate this to another module
+variable "ignition_gen" {
+  type    = list(string)
+  default = ["sh", "-c", "rm -rf *.ign && ../../../generate-configs.sh && echo '{\"path\":\"openshift\"}'"]
+}
 
 variable "bootstrap_ignition_path" {
   type    = string

@@ -17,6 +17,12 @@ data "vsphere_datastore" "nvme" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
+module "tls" {
+  source       = "../../modules/tls"
+  sub_domain   = "${var.cluster_slug}.${var.cluster_domain}"
+  organization = "Example Something"
+}
+
 module "cluster" {
   source          = "../.."
   ignition_path   = "${path.module}/${data.external.ignition.result.path}"
@@ -24,6 +30,7 @@ module "cluster" {
   vc_cluster      = var.vc_cluster
   vc_ds           = var.vc_ds
   vc_network      = var.vc_network
+  vc_vm_folder    = vsphere_folder.vm.path
   dns             = var.dns
   gateway         = var.gateway
   loadbalancer_ip = var.loadbalancer_ip
@@ -35,11 +42,16 @@ module "cluster" {
   master_nodes    = var.master_nodes
   storage_nodes   = var.storage_nodes
   worker_nodes    = var.worker_nodes
-  vmware_folder   = var.vmware_folder
   cos_template    = var.cos_template
   cluster_slug    = var.cluster_slug
   cluster_domain  = var.cluster_domain
   # depends_on      = [data.external.ignition_files]
+}
+
+resource "vsphere_folder" "vm" {
+  path          = var.vm_folder // TODO ${var.vmware_folder}/${var.cluster_slug}"
+  type          = "vm"
+  datacenter_id = data.vsphere_datacenter.dc.id
 }
 
 resource "tls_private_key" "ssh" {
@@ -85,8 +97,7 @@ data "local_file" "pull_secret" {
 }
 
 data "external" "ignition" {
-  program = ["sh", "-c", "rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{\"path\":\"openshift\"}'"]
-  # program    = ["sh", "-c", "rm -rf *.ign && ../../../generate-configs.sh && echo '{\"path\":\"openshift\"}'"]
+  program     = var.ignition_gen
   depends_on  = [local_file.install_config]
   working_dir = "openshift"
   # query = {
@@ -112,40 +123,6 @@ resource "null_resource" "openshift_config" {
   ]
 }
 */
-
-# ED25519 key - appears preferred by openshift
-resource "tls_private_key" "ed25519" {
-  algorithm = "ED25519"
-}
-
-resource "tls_cert_request" "api" {
-  private_key_pem = tls_private_key.ed25519.private_key_pem
-  # file("private_key.pem")
-  # private_key_pem = file("private_key.pem")
-
-  subject {
-    common_name  = "api.${var.cluster_slug}.${var.cluster_domain}"
-    organization = "ACME Examples, Inc"
-  }
-}
-
-resource "tls_cert_request" "api-int" {
-  private_key_pem = tls_private_key.ed25519.private_key_pem
-
-  subject {
-    common_name  = "api-int.${var.cluster_slug}.${var.cluster_domain}"
-    organization = "ACME Examples, Inc"
-  }
-}
-
-resource "tls_cert_request" "apps" {
-  private_key_pem = tls_private_key.ed25519.private_key_pem
-
-  subject {
-    common_name  = "*.apps.${var.cluster_slug}.${var.cluster_domain}"
-    organization = "ACME Examples, Inc"
-  }
-}
 
 /*
 output "openshift_config" {
