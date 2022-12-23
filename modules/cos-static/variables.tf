@@ -79,3 +79,8 @@ variable "netmask" {
 variable "dns_address" {
   type = string
 }
+
+variable "disk_attachments" {
+  type    = list(any) #(map(string))
+  default = []
+}

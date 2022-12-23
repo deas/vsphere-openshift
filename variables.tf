@@ -85,11 +85,12 @@ variable "worker_nodes" {
 
 variable "storage_nodes" {
   type = object({
-    disk_size = number
-    memory    = number
-    num_cpu   = number
-    slug      = string
-    ips       = list(string)
+    disk_size   = number
+    memory      = number
+    num_cpu     = number
+    slug        = string
+    ips         = list(string)
+    attachments = list(list(map(string)))
   })
   default = null
 }
@@ -113,9 +114,11 @@ variable "bootstrap_num_cpu" {
   default = 4 # 16 ? WTF?
 }
 
+/*
 variable "loadbalancer_ip" {
   type = string
 }
+*/
 
 variable "cluster_domain" {
   type = string

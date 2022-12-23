@@ -1,9 +1,9 @@
-VC_DS=DC0
+VC_DS=LocalDS_0
 VC_IMPORT_FOLDER=templates
 OC_CONFIG_DIR=./openshift
 OS_NAME=fcos
-FCOS_FULL_VERSION=37.20221127.3.0
-OS_IMG_URL=https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/$(FCOS_FULL_VERSION)/x86_64/fedora-coreos-$(FCOS_FULL_VERSION)-vmware.x86_64.ova
+OS_FULL_VERSION=37.20221127.3.0
+OS_IMG_URL=https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/$(OS_FULL_VERSION)/x86_64/fedora-coreos-$(OS_FULL_VERSION)-vmware.x86_64.ova
 # OS_NAME=rhcos
 # RHCOS_BASE_VERSION=4.11
 # RHCOS_FULL_VERSION=$(RHCOS_BASE_VERSION).9

@@ -26,11 +26,39 @@ master_nodes = {
 }
 
 storage_nodes = {
-  "disk_size" = 128
-  "memory"    = 32768 # TODO: 38 # ??
-  "num_cpu"   = 10
-  "slug"      = "storage"
-  "ips"       = ["10.126.20.8", "10.126.20.9", "10.126.20.10"]
+  "disk_size"   = 128
+  "memory"      = 32768 # TODO: 38 # ??
+  "num_cpu"     = 10
+  "slug"        = "storage"
+  "attachments" = [] /* TODO: Disks not supported by vscim - yet [
+    [{
+      path         = "/path-1-1.vmdk"
+      datastore_id = "LocalDS_0"
+      },
+      {
+        path         = "/path-1-2.vmdk"
+        datastore_id = "LocalDS_0"
+      }
+    ],
+    [{
+      path         = "/path-2-1.vmdk"
+      datastore_id = "LocalDS_0"
+      },
+      {
+        path         = "/path-2-2.vmdk"
+        datastore_id = "LocalDS_0"
+      }
+    ],
+    [{
+      path         = "/path-3-1.vmdk"
+      datastore_id = "LocalDS_0"
+      },
+      {
+        path         = "/path-3-2.vmdk"
+        datastore_id = "LocalDS_0"
+      }
+  ]]*/
+  "ips"         = ["10.126.20.8", "10.126.20.9", "10.126.20.10"]
 }
 
 worker_nodes = {

@@ -24,28 +24,49 @@ data "ignition_config" "vm" {
 
 resource "vsphere_virtual_machine" "vm" {
 
-  name               = var.name
-  resource_pool_id   = var.resource_pool_id
-  datastore_id       = var.datastore
-  num_cpus           = var.num_cpu
-  memory             = var.memory
-  memory_reservation = var.memory
-  guest_id           = var.guest_id
-  folder             = var.folder
-  enable_disk_uuid   = "true"
-
+  name                        = var.name
+  resource_pool_id            = var.resource_pool_id
+  datastore_id                = var.datastore
+  num_cpus                    = var.num_cpu
+  memory                      = var.memory
+  memory_reservation          = var.memory
+  guest_id                    = var.guest_id
+  folder                      = var.folder
+  enable_disk_uuid            = "true"
   wait_for_guest_net_timeout  = "0"
   wait_for_guest_net_routable = "false"
-
   network_interface {
     network_id   = var.network
     adapter_type = var.adapter_type
   }
-
   disk {
     label            = "disk0"
     size             = var.disk_size
     thin_provisioned = var.thin_provisioned
+    # TODO datastore_id = "fixme"
+  }
+
+  // TODO: Quick hack - we might want to migrate to terraform-vsphere-vm
+  dynamic "disk" {
+    for_each = var.disk_attachments # var.content_library == null ? data.vsphere_virtual_machine.template[0].disks : []
+    iterator = att
+    content {
+      label        = /*length(var.disk_label) > 0 ? var.disk_label[att.key] : */ "att-disk-${att.key}"
+      attach       = true
+      datastore_id = att.value.datastore_id
+      path         = att.value.path
+      unit_number  = 1 + att.key
+      #label             = length(var.disk_label) > 0 ? var.disk_label[disks.key] : "disk${disks.key}"
+      #size              = var.disk_size_gb != null ? var.disk_size_gb[disks.key] : data.vsphere_virtual_machine.template[0].disks[disks.key].size
+      #unit_number       = var.scsi_controller != null ? var.scsi_controller * 15 + disks.key : disks.key
+      #thin_provisioned  = data.vsphere_virtual_machine.template[0].disks[disks.key].thin_provisioned
+      #eagerly_scrub     = data.vsphere_virtual_machine.template[0].disks[disks.key].eagerly_scrub
+      #datastore_id      = var.disk_datastore != "" ? data.vsphere_datastore.disk_datastore[0].id : null
+      #storage_policy_id = length(var.template_storage_policy_id) > 0 ? var.template_storage_policy_id[disks.key] : null
+      #io_reservation    = length(var.io_reservation) > 0 ? var.io_reservation[disks.key] : null
+      #io_share_level    = length(var.io_share_level) > 0 ? var.io_share_level[disks.key] : "normal"
+      #io_share_count    = length(var.io_share_level) > 0 && var.io_share_level[disks.key] == "custom" ? var.io_share_count[disks.key] : null
+    }
   }
 
   clone {
