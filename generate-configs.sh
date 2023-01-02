@@ -1,5 +1,4 @@
 #!/bin/sh
-# TODO Get rid of me
 # A helper script for openshift-install
 
 set -e
@@ -7,7 +6,6 @@ set -e
 # create kubernetes manifests
 openshift-install create manifests --log-level debug
 
-# TODO Needed?
 # ensure masters are not schedulable
 if [ `uname` = 'Linux' ] ; then 
     sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' manifests/cluster-scheduler-02-config.yml

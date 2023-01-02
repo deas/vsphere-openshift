@@ -5,7 +5,10 @@ vc_cluster = "DC0_C0"
 vc_ds      = "LocalDS_0"
 vc_network = "VM Network"
 
-ignition_gen = ["sh", "-c", "rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{\"path\":\"openshift\"}'"]
+ignition_gen = ["sh", "-c", <<EOT
+rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{"path": "'$(pwd)'"}'
+EOT
+]
 
 dns     = ["10.101.2.1", "10.111.2.1", "10.101.2.2"]
 gateway = "10.126.20.1"

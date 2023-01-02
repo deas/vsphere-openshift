@@ -95,6 +95,37 @@ variable "storage_nodes" {
   default = null
 }
 
+variable "ignition_vars" {
+  type = object({
+    vc            = string # local.vc.server # "127.0.0.1"
+    vc_username   = string # local.vc.username
+    vc_password   = string # local.vc.password
+    vc_datacenter = string # local.datacenter.name
+    # vc_defaultDatastore = var.vc_ds
+    pullSecret = optional(string) #, "") # file("${path.module}/pull-secret-fake.json"))
+    # data.local_file.pull_secret.content
+    sshKey     = string               # var.public_key_openssh
+    apiVIP     = optional(string, "") # TODO: Check
+    ingressVIP = optional(string, "") # TODO: Check
+    httpsProxy = optional(string, "")
+    noProxy    = optional(string, "")
+
+  })
+}
+
+variable "ignition_gen" {
+  type    = list(string)
+  default = [] /*["sh", "-c", <<EOT
+rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{"path": "'$(pwd)'"}'
+EOT
+  ]*/
+  # ] '$(pwd)'"}
+  #  default = ["sh", "-c", <<EOT
+  #rm -rf *.ign && ${path.module}/generate-configs.sh && echo '{"path":"'$(pwd)'"}'
+  #EOT
+  #  ]
+}
+
 variable "bootstrap_ip" {
   type = string
 }

@@ -27,8 +27,8 @@ platform:
     datacenter: ${vc_datacenter}
     defaultDatastore: ${vc_defaultDatastore}
     # https://docs.openshift.com/container-platform/4.11/installing/installing_vsphere/installing-vsphere-installer-provisioned-network-customizations.html
-    # apiVIP: ${apiVIP} # 128.0.0.1 # The virtual IP (VIP) address that you configured for control plane API access.
-    # ingressVIP: ${ingressVIP} # 129.0.0.1 # The virtual IP (VIP) address that you configured for cluster ingress.
+    # apiVIP: ${apiVIP} # 128.0.0.1 # TODO The virtual IP (VIP) address that you configured for control plane API access.
+    # ingressVIP: ${ingressVIP} # 129.0.0.1 TODO # The virtual IP (VIP) address that you configured for cluster ingress.
     # vcenter: 192.168.1.240
     # username: administrator@vsphere.lan
 fips: false

@@ -25,7 +25,8 @@ module "tls" {
 
 module "cluster" {
   source         = "../.."
-  ignition_path  = "${path.module}/${data.external.ignition.result.path}"
+  ignition_path  = abspath("${path.module}/openshift")
+  ignition_gen   = var.ignition_gen
   vc_dc          = var.vc_dc
   vc_cluster     = var.vc_cluster
   vc_ds          = var.vc_ds
@@ -44,6 +45,17 @@ module "cluster" {
   cos_template   = var.cos_template
   cluster_slug   = var.cluster_slug
   cluster_domain = var.cluster_domain
+  ignition_vars = {
+    vc            = "127.0.0.1"
+    vc_username   = "user"
+    vc_password   = "password"
+    vc_datacenter = var.vc_dc
+    # pullSecret = optional(string, file("${path.module}/pull-secret-fake.json"))
+    sshKey = "" # var.public_key_openssh
+    apiVIP = "128.0.0.1"
+    # ingressVIP = "128.0.0.1"
+    # httpsProxy = optional(string)
+  }
   # loadbalancer_ip = var.loadbalancer_ip
   # depends_on      = [data.external.ignition_files]
 }
@@ -64,71 +76,6 @@ output "openssh_private_key" {
   value     = tls_private_key.ssh.private_key_openssh
   sensitive = true
 }
-
-# TODO: Duplication - but for now we are kicking off the openshift-install generation here 
-data "template_file" "install_config" {
-  template = file("../../install-config-tmpl.yaml")
-  vars = {
-    cluster_domain = "${var.cluster_domain}"
-    # TODO: We should pull them from the environment
-    vc                  = "127.0.0.1"
-    vc_username         = "user"
-    vc_password         = "pass"
-    vc_datacenter       = var.vc_dc
-    vc_defaultDatastore = var.vc_ds
-    name                = var.cluster_slug
-    pullSecret          = data.local_file.pull_secret.content
-    sshKey              = tls_private_key.ssh.public_key_openssh
-    httpsProxy          = var.https_proxy # http://<username>:<pswd>@<ip>:<port>
-    noProxy             = var.no_proxy
-    apiVIP              = "fix.me" # TODO
-    ingressVIP          = "fix.me" # TODO
-  }
-}
-
-resource "local_file" "install_config" {
-  content         = data.template_file.install_config.rendered
-  file_permission = 0644
-  filename        = "${path.module}/openshift/install-config.yaml"
-}
-
-data "local_file" "pull_secret" {
-  filename = var.pull_secret
-}
-
-data "external" "ignition" {
-  program     = var.ignition_gen
-  depends_on  = [local_file.install_config]
-  working_dir = "openshift"
-  # query = {
-  #  id = "abc123"
-  #}
-}
-
-/*
-resource "null_resource" "openshift_config" {
-  #triggers = {
-  #  always_run = "${timestamp()}"
-  #  # file_changed = md5(local_file.backup_file.content)
-  #  # value = var.some_id
-  #}
-
-  provisioner "local-exec" {
-    command = <<EOT
-      ${var.openshift_gen}
-    EOT
-  }
-  depends_on = [
-    local_file.install_config
-  ]
-}
-*/
-
-/*
-output "openshift_config" {
-  value = null_resource.openshift_config.id
-}
-*/
 
 output "cluster" {
   value = {
