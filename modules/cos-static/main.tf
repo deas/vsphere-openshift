@@ -1,5 +1,5 @@
 locals {
-  ignition_encoded = "data:text/plain;charset=utf-8;base64,${base64encode(file(var.ignition))}"
+  ignition_encoded = "data:text/plain;charset=utf-8;base64,${base64encode(var.ignition)}"
 }
 
 data "ignition_file" "hostname" {

@@ -1,12 +1,12 @@
 locals {
   all_worker_nodes = flatten([for nodes in var.worker_nodes :
     [for i, addr in nodes.ips : {
-      "disk_size"   = nodes.disk_size
-      "memory"      = nodes.memory
-      "num_cpu"     = nodes.num_cpu
-      "slug"        = nodes.slug
-      "attachments" = try(nodes.attachments[i], [])
-      "ipv4_address" = addr }
+      disk_size   = nodes.disk_size
+      memory      = nodes.memory
+      num_cpu     = nodes.num_cpu
+      slug        = nodes.slug
+      attachments = try(nodes.attachments[i], [])
+      ipv4_address = addr }
   ] if nodes != null])
   dns_address   = join(":", var.dns)
   ignition_path = data.external.ignition.result.path # var.ignition_path
@@ -31,7 +31,7 @@ data "vsphere_network" "network" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-data "vsphere_datastore" "nvme" {
+data "vsphere_datastore" "this" {
   name          = var.vc_ds
   datacenter_id = data.vsphere_datacenter.dc.id
 }
@@ -41,7 +41,7 @@ data "vsphere_virtual_machine" "template" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-# TODO: Could be conditional if full config gets passed in 
+# TODO: Could be conditional if full config gets passed in
 data "template_file" "install_config" {
   template = file("${path.module}/install-config-tmpl.yaml")
   vars = merge(
@@ -80,11 +80,11 @@ module "master" {
   count            = length(var.master_nodes.ips)
   name             = "${var.cluster_slug}-master-${count.index + 1}"
   folder           = var.vc_vm_folder
-  datastore        = data.vsphere_datastore.nvme.id
+  datastore        = data.vsphere_datastore.this.id
   disk_size        = var.master_nodes.disk_size
   memory           = var.master_nodes.memory
   num_cpu          = var.master_nodes.num_cpu
-  ignition         = "${local.ignition_path}/master.ign"
+  ignition         = file("${local.ignition_path}/master.ign")
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
@@ -102,14 +102,14 @@ module "master" {
 module "worker" {
   source           = "./modules/cos-static"
   count            = length(local.all_worker_nodes)
-  name             = "${var.cluster_slug}-wrk-${local.all_worker_nodes[count.index].slug}-${count.index + 1}"
+  name             = "${var.cluster_slug}-wrk-${local.all_worker_nodes[count.index]["slug"]}-${count.index + 1}"
   folder           = var.vc_vm_folder
-  datastore        = data.vsphere_datastore.nvme.id
-  disk_size        = local.all_worker_nodes[count.index].disk_size
-  memory           = local.all_worker_nodes[count.index].memory
-  num_cpu          = local.all_worker_nodes[count.index].num_cpu
-  ignition         = "${local.ignition_path}/worker.ign"
-  disk_attachments = local.all_worker_nodes[count.index].attachments
+  datastore        = data.vsphere_datastore.this.id
+  disk_size        = local.all_worker_nodes[count.index]["disk_size"]
+  memory           = local.all_worker_nodes[count.index]["memory"]
+  num_cpu          = local.all_worker_nodes[count.index]["num_cpu"]
+  ignition         = file("${local.ignition_path}/worker.ign")
+  disk_attachments = local.all_worker_nodes[count.index]["attachments"]
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
@@ -120,7 +120,7 @@ module "worker" {
   machine_cidr     = var.machine_cidr
   dns_address      = local.dns_address
   gateway          = var.gateway
-  ipv4_address     = local.all_worker_nodes[count.index].ipv4_address
+  ipv4_address     = local.all_worker_nodes[count.index]["ipv4_address"]
   netmask          = var.netmask
 }
 
@@ -129,11 +129,11 @@ module "bootstrap" {
   count            = var.bootstrap_complete ? 0 : 1
   name             = "${var.cluster_slug}-bootstrap"
   folder           = var.vc_vm_folder
-  datastore        = data.vsphere_datastore.nvme.id
+  datastore        = data.vsphere_datastore.this.id
   disk_size        = var.bootstrap_disk_size
   memory           = var.bootstrap_memory
   num_cpu          = var.bootstrap_num_cpu
-  ignition         = "${local.ignition_path}/bootstrap.ign"
+  ignition         = file("${local.ignition_path}/bootstrap.ign")
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
