@@ -106,25 +106,14 @@ variable "master_nodes" {
 }
 
 variable "worker_nodes" {
-  type = object({
-    disk_size = number
-    memory    = number
-    num_cpu   = number
-    slug      = string
-    ips       = list(string)
-  })
-  default = null
-}
-
-variable "storage_nodes" {
-  type = object({
+  type = list(object({
     disk_size   = number
     memory      = number
     num_cpu     = number
     slug        = string
     attachments = list(list(map(string)))
     ips         = list(string)
-  })
+  }))
   default = null
 }
 

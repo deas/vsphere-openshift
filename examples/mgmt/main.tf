@@ -24,23 +24,23 @@ module "tls" {
 }
 
 module "cluster" {
-  source         = "../.."
-  ignition_path  = abspath("${path.module}/openshift")
-  ignition_gen   = var.ignition_gen
-  vc_dc          = var.vc_dc
-  vc_cluster     = var.vc_cluster
-  vc_ds          = var.vc_ds
-  vc_network     = var.vc_network
-  vc_vm_folder   = vsphere_folder.vm.path
-  dns            = var.dns
-  gateway        = var.gateway
-  proxy_hosts    = var.proxy_hosts
-  ntp_servers    = var.ntp_servers
-  machine_cidr   = var.machine_cidr
-  netmask        = var.netmask
-  bootstrap_ip   = var.bootstrap_ip
-  master_nodes   = var.master_nodes
-  storage_nodes  = var.storage_nodes
+  source        = "../.."
+  ignition_path = abspath("${path.module}/openshift")
+  ignition_gen  = var.ignition_gen
+  vc_dc         = var.vc_dc
+  vc_cluster    = var.vc_cluster
+  vc_ds         = var.vc_ds
+  vc_network    = var.vc_network
+  vc_vm_folder  = vsphere_folder.vm.path
+  dns           = var.dns
+  gateway       = var.gateway
+  proxy_hosts   = var.proxy_hosts
+  ntp_servers   = var.ntp_servers
+  machine_cidr  = var.machine_cidr
+  netmask       = var.netmask
+  bootstrap_ip  = var.bootstrap_ip
+  master_nodes  = var.master_nodes
+  # storage_nodes  = var.storage_nodes
   worker_nodes   = var.worker_nodes
   cos_template   = var.cos_template
   cluster_slug   = var.cluster_slug

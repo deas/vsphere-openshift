@@ -1,5 +1,5 @@
 locals {
-  all_worker_nodes = flatten([for nodes in [var.worker_nodes, var.storage_nodes] :
+  all_worker_nodes = flatten([for nodes in var.worker_nodes :
     [for i, addr in nodes.ips : {
       "disk_size"   = nodes.disk_size
       "memory"      = nodes.memory
@@ -157,5 +157,5 @@ resource "vsphere_folder" "folder" {
 */
 
 output "kubeconfig" {
-  value = "kubeconfig" # TODO
+  value = "${data.external.ignition.result.path}/auth/kubeconfig"
 }
