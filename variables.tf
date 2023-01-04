@@ -10,16 +10,9 @@ variable "vc_ds" {
   type = string
 }
 
-variable "vc_network" {
-  type = string
-}
-
 variable "vc_vm_folder" {
   type = string
 }
-
-###########################
-## OCP Cluster Vars
 
 variable "cluster_slug" {
   type = string
@@ -29,32 +22,11 @@ variable "bootstrap_complete" {
   type    = string
   default = "false"
 }
-################
-## VMware vars - unlikely to need to change between releases of OCP
 
 variable "cos_template" {
   type = string
 }
 
-/*
-provider "vsphere" {
-}
-*/
-
-##########
-## Ignition
-
-#provider "ignition" {
-# https://www.terraform.io/docs/providers/ignition/index.html
-#  version = "1.2.1"
-#}
-
-#variable "ignition" {
-#  type    = string
-#  default = ""
-#}
-
-#########
 ## Machine variables
 # Keeping those ignition paths as vars as we might want to delegate this to another module
 
@@ -62,38 +34,48 @@ variable "ignition_path" {
   type = string
 }
 
+# TODO: Might make sense to condense into single nodes list 
 variable "master_nodes" {
   type = object({
-    disk_size = number
-    memory    = number
-    num_cpu   = number
-    ips       = list(string)
+    disk_size    = number
+    memory       = number
+    num_cpu      = number
+    ips          = list(string)
+    machine_cidr = string
+    netmask      = string
+    gateway      = string
+    network      = string
   })
   default = null
 }
 
 variable "worker_nodes" {
   type = list(object({
-    disk_size   = number
-    memory      = number
-    num_cpu     = number
-    slug        = string
-    ips         = list(string)
-    attachments = list(list(map(string)))
+    disk_size    = number
+    memory       = number
+    num_cpu      = number
+    slug         = string
+    network      = string
+    ips          = list(string)
+    machine_cidr = string
+    netmask      = string
+    gateway      = string
+    network      = string
+    attachments  = list(list(map(string)))
   }))
   default = null
 }
 
 variable "ignition_vars" {
   type = object({
-    vc            = string # local.vc.server # "127.0.0.1"
-    vc_username   = string # local.vc.username
-    vc_password   = string # local.vc.password
-    vc_datacenter = string # local.datacenter.name
+    vc            = string
+    vc_username   = string
+    vc_password   = string
+    vc_datacenter = string
     # vc_defaultDatastore = var.vc_ds
     pullSecret = optional(string) #, "") # file("${path.module}/pull-secret-fake.json"))
     # data.local_file.pull_secret.content
-    sshKey     = string               # var.public_key_openssh
+    sshKey     = string
     apiVIP     = optional(string, "") # TODO: Check
     ingressVIP = optional(string, "") # TODO: Check
     httpsProxy = optional(string, "")
@@ -104,21 +86,12 @@ variable "ignition_vars" {
 
 variable "ignition_gen" {
   type    = list(string)
-  default = [] /*["sh", "-c", <<EOT
-rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{"path": "'$(pwd)'"}'
-EOT
-  ]*/
-  # ] '$(pwd)'"}
-  #  default = ["sh", "-c", <<EOT
-  #rm -rf *.ign && ${path.module}/generate-configs.sh && echo '{"path":"'$(pwd)'"}'
-  #EOT
-  #  ]
+  default = []
 }
 
 variable "bootstrap_ip" {
   type = string
 }
-
 
 variable "bootstrap_disk_size" {
   type    = number
@@ -134,21 +107,7 @@ variable "bootstrap_num_cpu" {
   default = 4 # 16 ? WTF?
 }
 
-/*
-variable "loadbalancer_ip" {
-  type = string
-}
-*/
-
 variable "cluster_domain" {
-  type = string
-}
-
-variable "machine_cidr" {
-  type = string
-}
-
-variable "gateway" {
   type = string
 }
 
@@ -162,8 +121,4 @@ variable "ntp_servers" {
 
 variable "proxy_hosts" {
   type = list(string)
-}
-
-variable "netmask" {
-  type = string
 }

@@ -1,13 +1,18 @@
 locals {
   all_worker_nodes = flatten([for nodes in var.worker_nodes :
     [for i, addr in nodes.ips : {
-      disk_size   = nodes.disk_size
-      memory      = nodes.memory
-      num_cpu     = nodes.num_cpu
-      slug        = nodes.slug
-      attachments = try(nodes.attachments[i], [])
+      disk_size    = nodes.disk_size
+      memory       = nodes.memory
+      num_cpu      = nodes.num_cpu
+      slug         = nodes.slug
+      netmask      = nodes.netmask
+      gateway      = nodes.gateway
+      network      = nodes.network
+      machine_cidr = nodes.machine_cidr
+      attachments  = try(nodes.attachments[i], [])
       ipv4_address = addr }
   ] if nodes != null])
+  networks      = toset(concat([var.master_nodes.network], [for nodes in var.worker_nodes : nodes.network]))
   dns_address   = join(":", var.dns)
   ignition_path = data.external.ignition.result.path # var.ignition_path
   ignition_gen = length(var.ignition_gen) > 0 ? var.ignition_gen : ["sh", "-c", format(<<EOT
@@ -26,8 +31,16 @@ data "vsphere_compute_cluster" "cluster" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-data "vsphere_network" "network" {
+/*
+data "vsphere_network" "network" { # TODO : Rename for master
   name          = var.vc_network
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+*/
+
+data "vsphere_network" "nodes" {
+  for_each      = local.networks
+  name          = each.value
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
@@ -74,9 +87,8 @@ data "external" "ignition" {
   working_dir = var.ignition_path
 }
 
-# TODO We should allow dynamic / consolidate cos modules
 module "master" {
-  source           = "./modules/cos-static"
+  source           = "./modules/cos-static" # TODO We should allow dynamic / consolidate cos modules
   count            = length(var.master_nodes.ips)
   name             = "${var.cluster_slug}-master-${count.index + 1}"
   folder           = var.vc_vm_folder
@@ -89,39 +101,39 @@ module "master" {
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
   thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
-  network          = data.vsphere_network.network.id
+  network          = data.vsphere_network.nodes[var.master_nodes.network].id
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
   cluster_domain   = var.cluster_domain
-  machine_cidr     = var.machine_cidr
+  machine_cidr     = var.master_nodes.machine_cidr
   dns_address      = local.dns_address
-  gateway          = var.gateway
+  gateway          = var.master_nodes.gateway
   ipv4_address     = var.master_nodes.ips[count.index]
-  netmask          = var.netmask
+  netmask          = var.master_nodes.netmask
 }
 
 module "worker" {
   source           = "./modules/cos-static"
   count            = length(local.all_worker_nodes)
+  ignition         = file("${local.ignition_path}/worker.ign")
   name             = "${var.cluster_slug}-wrk-${local.all_worker_nodes[count.index]["slug"]}-${count.index + 1}"
   folder           = var.vc_vm_folder
   datastore        = data.vsphere_datastore.this.id
   disk_size        = local.all_worker_nodes[count.index]["disk_size"]
   memory           = local.all_worker_nodes[count.index]["memory"]
   num_cpu          = local.all_worker_nodes[count.index]["num_cpu"]
-  ignition         = file("${local.ignition_path}/worker.ign")
   disk_attachments = local.all_worker_nodes[count.index]["attachments"]
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
   thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
-  network          = data.vsphere_network.network.id
+  network          = data.vsphere_network.nodes[local.all_worker_nodes[count.index]["network"]].id
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
-  cluster_domain   = var.cluster_domain
-  machine_cidr     = var.machine_cidr
-  dns_address      = local.dns_address
-  gateway          = var.gateway
+  gateway          = local.all_worker_nodes[count.index]["gateway"]
+  machine_cidr     = local.all_worker_nodes[count.index]["machine_cidr"]
   ipv4_address     = local.all_worker_nodes[count.index]["ipv4_address"]
-  netmask          = var.netmask
+  netmask          = local.all_worker_nodes[count.index]["netmask"]
+  dns_address      = local.dns_address
+  cluster_domain   = var.cluster_domain
 }
 
 module "bootstrap" {
@@ -138,14 +150,14 @@ module "bootstrap" {
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
   thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
-  network          = data.vsphere_network.network.id
+  network          = data.vsphere_network.nodes[var.master_nodes.network].id # TODO: Should not borrow from master?
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
   cluster_domain   = var.cluster_domain
-  machine_cidr     = var.machine_cidr
+  machine_cidr     = var.master_nodes.machine_cidr
   dns_address      = local.dns_address
-  gateway          = var.gateway
+  gateway          = var.master_nodes.gateway
   ipv4_address     = var.bootstrap_ip
-  netmask          = var.netmask
+  netmask          = var.master_nodes.netmask
 }
 
 /*
@@ -157,5 +169,5 @@ resource "vsphere_folder" "folder" {
 */
 
 output "kubeconfig" {
-  value = "${data.external.ignition.result.path}/auth/kubeconfig"
+  value = file("${data.external.ignition.result.path}/auth/kubeconfig")
 }

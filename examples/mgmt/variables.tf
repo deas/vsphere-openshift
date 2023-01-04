@@ -14,10 +14,11 @@ variable "vc_cluster" {
 variable "vc_ds" {
   type = string
 }
-
+/*
 variable "vc_network" {
   type = string
 }
+*/
 
 ###########################
 ## OCP Cluster Vars
@@ -97,22 +98,30 @@ variable "worker_ignition_path" {
 
 variable "master_nodes" {
   type = object({
-    disk_size = number
-    memory    = number
-    num_cpu   = number
-    ips       = list(string)
+    disk_size    = number
+    memory       = number
+    num_cpu      = number
+    machine_cidr = string
+    netmask      = string
+    gateway      = string
+    network      = string
+    ips          = list(string)
   })
   default = null
 }
 
 variable "worker_nodes" {
   type = list(object({
-    disk_size   = number
-    memory      = number
-    num_cpu     = number
-    slug        = string
-    attachments = list(list(map(string)))
-    ips         = list(string)
+    disk_size    = number
+    memory       = number
+    num_cpu      = number
+    slug         = string
+    machine_cidr = string
+    netmask      = string
+    gateway      = string
+    network      = string
+    attachments  = list(list(map(string)))
+    ips          = list(string)
   }))
   default = null
 }
@@ -131,6 +140,7 @@ variable "cluster_domain" {
   type = string
 }
 
+/*
 variable "machine_cidr" {
   type = string
 }
@@ -138,6 +148,7 @@ variable "machine_cidr" {
 variable "gateway" {
   type = string
 }
+*/
 
 variable "dns" {
   type = list(string)
@@ -151,6 +162,8 @@ variable "proxy_hosts" {
   type = list(string)
 }
 
+/*
 variable "netmask" {
   type = string
 }
+*/

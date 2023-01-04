@@ -7,10 +7,12 @@ data "vsphere_compute_cluster" "cluster" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
+/*
 data "vsphere_network" "network" {
   name          = var.vc_network
   datacenter_id = data.vsphere_datacenter.dc.id
 }
+*/
 
 data "vsphere_datastore" "nvme" {
   name          = var.vc_ds
@@ -30,16 +32,16 @@ module "cluster" {
   vc_dc         = var.vc_dc
   vc_cluster    = var.vc_cluster
   vc_ds         = var.vc_ds
-  vc_network    = var.vc_network
-  vc_vm_folder  = vsphere_folder.vm.path
-  dns           = var.dns
-  gateway       = var.gateway
-  proxy_hosts   = var.proxy_hosts
-  ntp_servers   = var.ntp_servers
-  machine_cidr  = var.machine_cidr
-  netmask       = var.netmask
-  bootstrap_ip  = var.bootstrap_ip
-  master_nodes  = var.master_nodes
+  # vc_network    = var.vc_network
+  vc_vm_folder = vsphere_folder.vm.path
+  dns          = var.dns
+  # gateway       = var.gateway
+  proxy_hosts = var.proxy_hosts
+  ntp_servers = var.ntp_servers
+  # machine_cidr  = var.machine_cidr
+  # netmask       = var.netmask
+  bootstrap_ip = var.bootstrap_ip
+  master_nodes = var.master_nodes
   # storage_nodes  = var.storage_nodes
   worker_nodes   = var.worker_nodes
   cos_template   = var.cos_template

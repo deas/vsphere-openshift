@@ -3,45 +3,57 @@
 vc_dc      = "DC0"
 vc_cluster = "DC0_C0"
 vc_ds      = "LocalDS_0"
-vc_network = "VM Network"
+# vc_network = "VM Network" # TODO: Should probably be named master
 
 ignition_gen = ["sh", "-c", <<EOT
-rm -rf *.ign && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{"path": "'$(pwd)'"}'
+rm -rf *.ign && mkdir -p auth && echo 'test' > auth/kubeconfig && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{"path": "'$(pwd)'"}'
 EOT
 ]
 
-dns     = ["10.101.2.1", "10.111.2.1", "10.101.2.2"]
-gateway = "10.126.20.1"
+dns = ["10.101.2.1", "10.111.2.1", "10.101.2.2"]
+# gateway = "10.126.20.1"
 # loadbalancer_ip = "192.168.5.160"
 proxy_hosts = ["http://...:8080", "https://...:8080"]
 ntp_servers = ["dns_name_1", "dns_name_2"] # TODO
 
 # "vlan_id" = 1263
-machine_cidr = "10.126.20.0/24"
-netmask      = "255.255.255.0"
+#machine_cidr = "10.126.20.0/24"
+# netmask      = "255.255.255.0"
 bootstrap_ip = "10.126.20.4"
 
 master_nodes = {
-  "disk_size" = 128
-  "memory"    = 16384
-  "num_cpu"   = 4
-  "ips"       = ["10.126.20.5", "10.126.20.6", "10.126.20.7"]
+  "disk_size"    = 128
+  "memory"       = 16384
+  "num_cpu"      = 4
+  "machine_cidr" = "10.126.20.0/24"
+  "netmask"      = "255.255.255.0"
+  "gateway"      = "10.126.20.1"
+  "network"      = "DC0_DVPG0"
+  "ips"          = ["10.126.20.5", "10.126.20.6", "10.126.20.7"]
 }
 worker_nodes = [
   {
-    "disk_size"   = 128
-    "memory"      = 32768
-    "num_cpu"     = 4
-    "slug"        = "default"
-    "attachments" = []
-    "ips"         = ["10.126.20.32", "10.126.20.33", "10.126.20.34"]
+    "disk_size"    = 128
+    "memory"       = 32768
+    "num_cpu"      = 4
+    "slug"         = "default"
+    "machine_cidr" = "10.126.20.0/24"
+    "netmask"      = "255.255.255.0"
+    "gateway"      = "10.126.20.1"
+    "network"      = "DC0_DVPG0"
+    "attachments"  = []
+    "ips"          = ["10.126.20.32", "10.126.20.33", "10.126.20.34"]
   },
   {
-    "disk_size"   = 128
-    "memory"      = 32768 # TODO: 38 # ??
-    "num_cpu"     = 10
-    "slug"        = "storage"
-    "attachments" = [] # TODO: Disks not supported by vscim - yet
+    "disk_size"    = 128
+    "memory"       = 32768 # TODO: 38 # ??
+    "num_cpu"      = 10
+    "slug"         = "storage"
+    "machine_cidr" = "10.126.20.0/24"
+    "netmask"      = "255.255.255.0"
+    "gateway"      = "10.126.20.1"
+    "network"      = "DC0_DVPG0"
+    "attachments"  = [] # TODO: Disks not supported by vscim - yet
     /* "attachments" = [[
       {
         path         = "/path-1-1.vmdk"
