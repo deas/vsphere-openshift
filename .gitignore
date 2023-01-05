@@ -31,7 +31,8 @@ override.tf.json
 .envrc
 openshift/
 install-config.yaml
-.vscode
+.vscode/
+.idea/
 bin/
 *.pem
 pull-secret.json

@@ -1,6 +1,8 @@
 data "ignition_systemd_unit" "haproxy" {
-  name    = "haproxy.service"
-  content = file("${path.module}/files/haproxy.service")
+  name = "haproxy.service"
+  content = templatefile("${path.module}/files/haproxy.service.tmpl", {
+    env = var.env
+  })
 }
 
 data "ignition_file" "haproxy" {
@@ -20,8 +22,15 @@ data "ignition_user" "core" {
   ssh_authorized_keys = var.ssh_key_file
 }
 
+# proxy object introduced with spec 3.1 not covered by 2.1.3 provider
 data "ignition_config" "lb" {
-  users   = [data.ignition_user.core.rendered]
-  files   = [data.ignition_file.haproxy.rendered]
-  systemd = [data.ignition_systemd_unit.haproxy.rendered]
+  users = [data.ignition_user.core.rendered]
+  files = [data.ignition_file.haproxy.rendered]
+  systemd = [data.ignition_systemd_unit.haproxy.rendered /*,
+   # systemctl list-unit-files --type=service
+   jsonencode({
+     "name" = "vmtoolsd.service"
+     "enabled" = true})
+     */
+  ]
 }

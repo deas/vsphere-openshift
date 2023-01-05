@@ -5,6 +5,9 @@ Wants=network-online.target
 
 [Service]
 TimeoutStartSec=0
+%{ for k, v in env ~}
+Environment="${k}=${v}"
+%{ endfor ~}
 ExecStartPre=-/bin/podman kill haproxy
 ExecStartPre=-/bin/podman rm haproxy
 ExecStartPre=/bin/podman pull quay.io/openshift/origin-haproxy-router

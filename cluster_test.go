@@ -11,7 +11,7 @@ var _ = Describe("Management", func() {
 	It("should fully apply from scratch", func() {
 		varFiles := []string{"test.tfvars"}
 		t := GinkgoT()
-		tfDir := "./examples/mgmt"
+		tfDir := "./examples/demo"
 		tfVars := map[string]interface{}{
 			// "openshift_gen": "touch openshift/bootstrap.ign && touch openshift/master.ign && touch openshift/worker.ign",
 		}
