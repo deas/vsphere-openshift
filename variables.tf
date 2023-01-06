@@ -119,6 +119,6 @@ variable "ntp_servers" {
   type = list(string)
 }
 
-variable "proxy_hosts" {
-  type = list(string)
-}
+#variable "proxy_hosts" {
+#  type = list(string)
+#}

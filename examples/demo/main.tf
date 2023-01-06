@@ -32,17 +32,12 @@ module "cluster" {
   vc_dc         = var.vc_dc
   vc_cluster    = var.vc_cluster
   vc_ds         = var.vc_ds
-  # vc_network    = var.vc_network
-  vc_vm_folder = vsphere_folder.vm.path
-  dns          = var.dns
-  # gateway       = var.gateway
-  proxy_hosts = var.proxy_hosts
-  ntp_servers = var.ntp_servers
-  # machine_cidr  = var.machine_cidr
-  # netmask       = var.netmask
-  bootstrap_ip = var.bootstrap_ip
-  master_nodes = var.master_nodes
-  # storage_nodes  = var.storage_nodes
+  vc_vm_folder  = vsphere_folder.vm.path
+  dns           = var.dns
+  # proxy_hosts = var.proxy_hosts
+  ntp_servers    = var.ntp_servers
+  bootstrap_ip   = var.bootstrap_ip
+  master_nodes   = var.master_nodes
   worker_nodes   = var.worker_nodes
   cos_template   = var.cos_template
   cluster_slug   = var.cluster_slug
@@ -52,18 +47,18 @@ module "cluster" {
     vc_username   = "user"
     vc_password   = "password"
     vc_datacenter = var.vc_dc
-    # pullSecret = optional(string, file("${path.module}/pull-secret-fake.json"))
-    sshKey = "" # var.public_key_openssh
-    apiVIP = "128.0.0.1"
+    sshKey        = "" # var.public_key_openssh
+    apiVIP        = "128.0.0.1"
     # ingressVIP = "128.0.0.1"
-    # httpsProxy = optional(string)
+    # httpsProxy = "http://localhost:3128" # optional(string)
+    # httpsProxy = "http://localhost:3128" # optional(string)
   }
   # loadbalancer_ip = var.loadbalancer_ip
   # depends_on      = [data.external.ignition_files]
 }
 
 resource "vsphere_folder" "vm" {
-  path          = var.vm_folder // TODO ${var.vmware_folder}/${var.cluster_slug}"
+  path          = var.vm_folder
   type          = "vm"
   datacenter_id = data.vsphere_datacenter.dc.id
 }

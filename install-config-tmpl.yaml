@@ -12,11 +12,11 @@ proxy:
 compute:
 - hyperthreading: Enabled
   name: worker
-  replicas: 0 # TODO : Length from terroform?
+  replicas: 0 # TODO : Length from terraform?
 controlPlane:
   hyperthreading: Enabled
   name: master
-  replicas: 3  # TODO : Length from terroform?
+  replicas: 3  # TODO : Length from terraform?
 metadata:
   name: ${name}
 platform:
