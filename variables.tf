@@ -115,9 +115,10 @@ variable "dns" {
   type = list(string)
 }
 
-variable "ntp_servers" {
-  type = list(string)
-}
+# TODO use ntp_servers
+#variable "ntp_servers" {
+#  type = list(string)
+#}
 
 #variable "proxy_hosts" {
 #  type = list(string)

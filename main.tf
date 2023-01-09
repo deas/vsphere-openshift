@@ -100,7 +100,7 @@ module "master" {
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
-  thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
+  thin_provisioned = data.vsphere_virtual_machine.template.disks[0].thin_provisioned
   network          = data.vsphere_network.nodes[var.master_nodes.network].id
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
   cluster_domain   = var.cluster_domain
@@ -125,7 +125,7 @@ module "worker" {
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
-  thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
+  thin_provisioned = data.vsphere_virtual_machine.template.disks[0].thin_provisioned
   network          = data.vsphere_network.nodes[local.all_worker_nodes[count.index]["network"]].id
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
   gateway          = local.all_worker_nodes[count.index]["gateway"]
@@ -149,7 +149,7 @@ module "bootstrap" {
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
-  thin_provisioned = data.vsphere_virtual_machine.template.disks.0.thin_provisioned
+  thin_provisioned = data.vsphere_virtual_machine.template.disks[0].thin_provisioned
   network          = data.vsphere_network.nodes[var.master_nodes.network].id # TODO: Should not borrow from master?
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
   cluster_domain   = var.cluster_domain

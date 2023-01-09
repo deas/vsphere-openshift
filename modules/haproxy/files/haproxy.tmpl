@@ -40,26 +40,26 @@ frontend router-https
 
 backend api-server
     balance roundrobin
-    %{ for addr in api ~}
+%{ for addr in api ~}
     server ${addr} ${addr}:6443 check
-    %{ endfor ~}
+%{ endfor ~}
 
 backend machine-config-server
     balance roundrobin
-    %{ for addr in api ~}
+%{ for addr in api ~}
     server ${addr} ${addr}:22623 check
-    %{ endfor ~}
+%{ endfor ~}
 
 backend router-http
     balance source
     mode tcp
-    %{ for addr in ingress ~}
+%{ for addr in ingress ~}
     server ${addr} ${addr}:80 check
-    %{ endfor ~}
+%{ endfor ~}
 
 backend router-https
     balance source
     mode tcp
-    %{ for addr in ingress ~}
+%{ for addr in ingress ~}
     server ${addr} ${addr}:443 check
-    %{ endfor ~}
+%{ endfor ~}

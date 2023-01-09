@@ -1,3 +1,15 @@
+# TODO: Here as depedendency `disks` argument should be pulled from worker nodes
+module "disk_attachments" {
+  source = "../../modules/disk-attachments"
+  vc_dc  = var.vc_dc
+  disks = { /*
+    "bare-test" = {
+      ds   = "LocalDS_0"
+      size = 172
+    }*/
+  }
+}
+
 data "vsphere_datacenter" "dc" {
   name = var.vc_dc
 }
@@ -6,13 +18,6 @@ data "vsphere_compute_cluster" "cluster" {
   name          = var.vc_cluster
   datacenter_id = data.vsphere_datacenter.dc.id
 }
-
-/*
-data "vsphere_network" "network" {
-  name          = var.vc_network
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-*/
 
 data "vsphere_datastore" "nvme" {
   name          = var.vc_ds
@@ -35,7 +40,7 @@ module "cluster" {
   vc_vm_folder  = vsphere_folder.vm.path
   dns           = var.dns
   # proxy_hosts = var.proxy_hosts
-  ntp_servers    = var.ntp_servers
+  # ntp_servers    = var.ntp_servers
   bootstrap_ip   = var.bootstrap_ip
   master_nodes   = var.master_nodes
   worker_nodes   = var.worker_nodes
@@ -49,12 +54,12 @@ module "cluster" {
     vc_datacenter = var.vc_dc
     sshKey        = "" # var.public_key_openssh
     apiVIP        = "128.0.0.1"
+    httpsProxy    = "http://localhost:3128" # optional(string)
+    noProxy       = ".foo.bar"
     # ingressVIP = "128.0.0.1"
     # httpsProxy = "http://localhost:3128" # optional(string)
-    # httpsProxy = "http://localhost:3128" # optional(string)
   }
-  # loadbalancer_ip = var.loadbalancer_ip
-  # depends_on      = [data.external.ignition_files]
+  depends_on = [module.disk_attachments]
 }
 
 resource "vsphere_folder" "vm" {
