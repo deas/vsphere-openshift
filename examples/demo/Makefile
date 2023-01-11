@@ -59,5 +59,6 @@ approve-csr:
 import-ova:
 	govc import.ova --folder=$(VC_IMPORT_FOLDER) --ds=$(VC_DS) --name=$(OS_NAME)-$(OC_FULL_VERSION) $(OS_IMG_URL)
 
-#kraken:
-#	docker run --name=kraken --net=host -v /Users/alex/git/ib/ocp4/openshift/auth/kubeconfig:/root/.kube/config -v /Users/alex/git/ib/ocp4/kraken/config/config.yaml:/root/kraken/config/config.yaml -d quay.io/openshift-scale/kraken:latest
+#.PHONY: chaos-test
+#chaos-test:
+#	echo docker run --rm --net=host -v $(KUBECONFIG):/root/.kube/config -v ${KRAKEN_CONFIG}:/root/kraken -d quay.io/openshift-scale/kraken:latest
