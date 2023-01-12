@@ -6,7 +6,7 @@ vc_ds      = "LocalDS_0"
 # vc_network = "VM Network" # TODO: Should probably be named master
 
 ignition_gen = ["sh", "-c", <<EOT
-rm -rf *.ign && mkdir -p auth && echo 'test' > auth/kubeconfig && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{"path": "'$(pwd)'"}'
+rm -rf *.ign && mkdir -p auth && echo 'test' > auth/kubeconfig && echo 'test' > auth/kubeadmin-password && touch bootstrap.ign && touch master.ign && touch worker.ign && echo '{"path": "'$(pwd)'"}'
 EOT
 ]
 
