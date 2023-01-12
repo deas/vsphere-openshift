@@ -34,7 +34,7 @@ variable "ignition_path" {
   type = string
 }
 
-# TODO: Might make sense to condense into single nodes list 
+# TODO: Might make sense to condense into single nodes list
 variable "master_nodes" {
   type = object({
     disk_size    = number
@@ -115,10 +115,10 @@ variable "dns" {
   type = list(string)
 }
 
-# TODO use ntp_servers
-#variable "ntp_servers" {
-#  type = list(string)
-#}
+variable "ntp_servers" {
+  type    = list(string)
+  default = []
+}
 
 #variable "proxy_hosts" {
 #  type = list(string)

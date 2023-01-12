@@ -171,3 +171,23 @@ resource "vsphere_folder" "folder" {
 output "kubeconfig" {
   value = file("${data.external.ignition.result.path}/auth/kubeconfig")
 }
+
+output "kubeadmin_password" {
+  value     = file("${data.external.ignition.result.path}/auth/kubeadmin-password")
+  sensitive = true
+}
+
+# terraform output -json cluster | jq '.bu["99-master-chrony.bu"]' -r
+output "bu" {
+  #type = map
+  value = length(var.ntp_servers) > 0 ? {
+    "99-worker-chrony.bu" = templatefile("${path.module}/assets/99-xxx-chrony.bu.tmpl", {
+      servers   = var.ntp_servers
+      node_type = "worker"
+    })
+    "99-master-chrony.bu" = templatefile("${path.module}/assets/99-xxx-chrony.bu.tmpl", {
+      servers   = var.ntp_servers
+      node_type = "master"
+    })
+  } : null
+}

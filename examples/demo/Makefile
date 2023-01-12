@@ -1,6 +1,8 @@
 VC_DS=LocalDS_0
 VC_IMPORT_FOLDER=templates
 OC_CONFIG_DIR=./openshift
+KUBECONFIG=$(OC_CONFIG_DIR)/auth/kubeconfig
+OC=oc --kubeconfig $(KUBECONFIG)
 OS_NAME=fcos
 OS_FULL_VERSION=37.20221127.3.0
 OS_IMG_URL=https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/$(OS_FULL_VERSION)/x86_64/fedora-coreos-$(OS_FULL_VERSION)-vmware.x86_64.ova
@@ -8,6 +10,7 @@ OS_IMG_URL=https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/$(
 # RHCOS_BASE_VERSION=4.11
 # RHCOS_FULL_VERSION=$(RHCOS_BASE_VERSION).9
 # OS_IMG_URL=https://mirror.openshift.com/pub/openshift-v4/dependencies/$(RHCOS_BASE_VERSION)/$(RHCOS_FULL_VERSION)/rhcos-vmware.x86_64.ova
+KRAKEN_CONFIG=$(shell pwd)/../../kraken/config/config.yaml
 
 init:
 	terraform init
@@ -29,36 +32,41 @@ wait-for-install:
 	cd openshift; openshift-install wait-for install-complete --log-level debug
 
 check-install:
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get nodes && echo "" && \
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get co && echo "" && \
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get csr
+	$(OC) get nodes && echo "" && \
+	$(OC) get co && echo "" && \
+	$(OC) get csr
 
 # lazy because it auto approves CSRs - not production suitable!
 lazy-install:
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get nodes && echo "" && \
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get co && echo "" && \
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get csr && \
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get csr -ojson | \
+	$(OC) get nodes && echo "" && \
+	$(OC) get co && echo "" && \
+	$(OC) get csr && \
+	$(OC) get csr -ojson | \
 		jq -r '.items[] | select(.status == {} ) | .metadata.name' | \
-		xargs oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig adm certificate approve
+		xargs $(OC) adm certificate approve
 
 get-co:
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get co
+	$(OC) get co
 
 get-nodes:
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get nodes
+	$(OC) get nodes
 
 get-csr:
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get csr
+	$(OC) get csr
 
 approve-csr:
-	oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig get csr -ojson | \
+	$(OC) get csr -ojson | \
 		jq -r '.items[] | select(.status == {} ) | .metadata.name' | \
-		xargs oc --kubeconfig $(OC_CONFIG_DIR)/auth/kubeconfig adm certificate approve
+		xargs $(OC) adm certificate approve
 
 import-ova:
 	govc import.ova --folder=$(VC_IMPORT_FOLDER) --ds=$(VC_DS) --name=$(OS_NAME)-$(OC_FULL_VERSION) $(OS_IMG_URL)
 
-#.PHONY: chaos-test
-#chaos-test:
-#	echo docker run --rm --net=host -v $(KUBECONFIG):/root/.kube/config -v ${KRAKEN_CONFIG}:/root/kraken -d quay.io/openshift-scale/kraken:latest
+.PHONY: chaos-test
+chaos-test:
+    # -v <path_to_scenarios_directory>:/root/kraken/scenarios:Z
+	docker run --name=kraken --net=host -v $(KUBECONFIG):/root/.kube/config:Z -v $(KRAKEN_CONFIG):/root/kraken/config/config.yaml:Z quay.io/openshift-scale/kraken:latest
+	docker cp kraken:/root/kraken/kraken.report .
+	docker rm kraken
+#  quay.io/chaos-kubox/krkn:latest
+#  quay.io/openshift-scale/kraken:latest

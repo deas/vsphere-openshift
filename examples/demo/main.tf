@@ -47,6 +47,7 @@ module "cluster" {
   cos_template   = var.cos_template
   cluster_slug   = var.cluster_slug
   cluster_domain = var.cluster_domain
+  ntp_servers    = var.ntp_servers
   ignition_vars = {
     vc            = "127.0.0.1"
     vc_username   = "user"
@@ -81,6 +82,7 @@ output "openssh_private_key" {
 
 output "cluster" {
   value = {
+    "bu"         = module.cluster.bu
     "kubeconfig" = module.cluster.kubeconfig
   }
 }

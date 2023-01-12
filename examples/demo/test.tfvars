@@ -14,7 +14,7 @@ dns = ["10.101.2.1", "10.111.2.1", "10.101.2.2"]
 # gateway = "10.126.20.1"
 # loadbalancer_ip = "192.168.5.160"
 proxy_hosts = ["http://...:8080", "https://...:8080"]
-# ntp_servers = ["dns_name_1", "dns_name_2"] # TODO
+ntp_servers = ["ntp_1", "ntp_2"]
 
 # "vlan_id" = 1263
 #machine_cidr = "10.126.20.0/24"

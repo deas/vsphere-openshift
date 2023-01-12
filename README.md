@@ -27,6 +27,7 @@ The main terraform module is at the root of the repository. It covers a single c
 | ignition\_path | n/a | `string` | n/a | yes |
 | ignition\_vars | n/a | <pre>object({<br>    vc            = string<br>    vc_username   = string<br>    vc_password   = string<br>    vc_datacenter = string<br>    # vc_defaultDatastore = var.vc_ds<br>    pullSecret = optional(string) #, "") # file("${path.module}/pull-secret-fake.json"))<br>    # data.local_file.pull_secret.content<br>    sshKey     = string<br>    apiVIP     = optional(string, "") # TODO: Check<br>    ingressVIP = optional(string, "") # TODO: Check<br>    httpsProxy = optional(string, "")<br>    noProxy    = optional(string, "")<br><br>  })</pre> | n/a | yes |
 | master\_nodes | TODO: Might make sense to condense into single nodes list | <pre>object({<br>    disk_size    = number<br>    memory       = number<br>    num_cpu      = number<br>    ips          = list(string)<br>    machine_cidr = string<br>    netmask      = string<br>    gateway      = string<br>    network      = string<br>  })</pre> | `null` | no |
+| ntp\_servers | n/a | `list(string)` | `[]` | no |
 | vc\_cluster | n/a | `string` | n/a | yes |
 | vc\_dc | n/a | `string` | n/a | yes |
 | vc\_ds | n/a | `string` | n/a | yes |
@@ -37,6 +38,15 @@ The main terraform module is at the root of the repository. It covers a single c
 
 | Name | Description |
 |------|-------------|
+| bu | terraform output -json cluster \| jq '.bu["99-master-chrony.bu"]' -r |
+| kubeadmin\_password | n/a |
 | kubeconfig | n/a |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+
+## TODO
+- Bits that should be worked on are marked with `TODO` tags.
+- [VCSim does not support QueryVirtualDiskInfo_Task #3000](https://github.com/vmware/govmomi/issues/3000)
+- `Error: error fetching DVS after creation: ServerFaultCode: The object has already been deleted or has not been completely created`
+- `Error: could not find DVS "50 2c 0e c6 65 64 60 98-43 b8 ff 56 1c 19 1d 56": ServerFaultCode: DistributedVirtualSwitchManager:DVSManager does not implement: QueryDvsByUuid`

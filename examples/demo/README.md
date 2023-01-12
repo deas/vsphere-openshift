@@ -35,6 +35,7 @@
 | master\_ignition\_path | n/a | `string` | `"openshift/master.ign"` | no |
 | master\_nodes | n/a | <pre>object({<br>    disk_size    = number<br>    memory       = number<br>    num_cpu      = number<br>    machine_cidr = string<br>    netmask      = string<br>    gateway      = string<br>    network      = string<br>    ips          = list(string)<br>  })</pre> | `null` | no |
 | no\_proxy | n/a | `string` | `""` | no |
+| ntp\_servers | n/a | `list(string)` | n/a | yes |
 | openshift\_gen | n/a | `string` | `"cd openshift && ../../../generate-configs.sh"` | no |
 | proxy\_hosts | n/a | `list(string)` | n/a | yes |
 | pull\_secret | n/a | `string` | `"../../pull-secret-fake.json"` | no |
