@@ -82,9 +82,21 @@ output "openssh_private_key" {
 
 output "cluster" {
   value = {
-    "bu"         = module.cluster.bu
-    "kubeconfig" = module.cluster.kubeconfig
+    "bu" = module.cluster.bu
   }
+}
+
+output "kubeadmin_password" {
+  value     = module.cluster.kubeadmin_password
+  sensitive = true
+}
+
+output "api_endpoint" {
+  value = module.cluster.api_endpoint
+}
+
+output "ingress_domain" {
+  value = module.cluster.ingress_domain
 }
 
 /*

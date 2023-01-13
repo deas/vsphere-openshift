@@ -168,13 +168,17 @@ resource "vsphere_folder" "folder" {
 }
 */
 
-output "kubeconfig" {
-  value = file("${data.external.ignition.result.path}/auth/kubeconfig")
-}
-
 output "kubeadmin_password" {
   value     = file("${data.external.ignition.result.path}/auth/kubeadmin-password")
   sensitive = true
+}
+
+output "api_endpoint" {
+  value = format("https://api.%s.%s:6443", var.cluster_slug, var.cluster_domain)
+}
+
+output "ingress_domain" {
+  value = format("apps.%s.%s", var.cluster_slug, var.cluster_domain)
 }
 
 # terraform output -json cluster | jq '.bu["99-master-chrony.bu"]' -r

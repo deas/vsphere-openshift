@@ -50,7 +50,10 @@
 
 | Name | Description |
 |------|-------------|
+| api\_endpoint | n/a |
 | cluster | n/a |
+| ingress\_domain | n/a |
+| kubeadmin\_password | n/a |
 | openssh\_private\_key | terraform output -raw openssh\_private\_key |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -38,9 +38,10 @@ The main terraform module is at the root of the repository. It covers a single c
 
 | Name | Description |
 |------|-------------|
+| api\_endpoint | n/a |
 | bu | terraform output -json cluster \| jq '.bu["99-master-chrony.bu"]' -r |
+| ingress\_domain | n/a |
 | kubeadmin\_password | n/a |
-| kubeconfig | n/a |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
