@@ -18,6 +18,15 @@ jobs:
       with:
         # https://github.com/gruntwork-io/terratest/issues/706#issuecomment-733495166
         terraform_wrapper: false
+    - uses: terraform-linters/setup-tflint@v3
+      name: Setup TFLint
+      with:
+        tflint_version: latest # v0.44.1
+    - uses: actions/cache@v3
+      name: Setup tflint Plugins Cache
+      with:
+        path: ~/.tflint.d/plugins
+        key: ${{ matrix.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
     - name: Setup Go
       uses: actions/setup-go@v3
       with:
@@ -34,7 +43,7 @@ jobs:
     - name: Check Format
       run: make fmt
     - name: Lint
-      run: make vet
+      run: make lint
     - name: Run tests
       run: |
         make test

@@ -1,3 +1,14 @@
+terraform {
+  required_version = ">= 1.3"
+
+  required_providers {
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+  }
+}
+
 # ED25519 key - appears preferred by openshift
 resource "tls_private_key" "ed25519" {
   algorithm = "ED25519"

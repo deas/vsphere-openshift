@@ -1,3 +1,18 @@
+terraform {
+  required_version = ">= 1.3"
+
+  required_providers {
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    vsphere = {
+      source  = "hashicorp/vsphere"
+      version = "~> 2.2"
+    }
+  }
+}
+
 # TODO: Here as depedendency `disks` argument should be pulled from worker nodes
 module "disk_attachments" {
   source = "../../modules/disk-attachments"
@@ -14,16 +29,6 @@ data "vsphere_datacenter" "dc" {
   name = var.vc_dc
 }
 
-data "vsphere_compute_cluster" "cluster" {
-  name          = var.vc_cluster
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
-data "vsphere_datastore" "nvme" {
-  name          = var.vc_ds
-  datacenter_id = data.vsphere_datacenter.dc.id
-}
-
 module "tls" {
   source       = "../../modules/tls"
   sub_domain   = "${var.cluster_slug}.${var.cluster_domain}"
@@ -31,16 +36,13 @@ module "tls" {
 }
 
 module "cluster" {
-  source        = "../.."
-  ignition_path = abspath("${path.module}/openshift")
-  ignition_gen  = var.ignition_gen
-  vc_dc         = var.vc_dc
-  vc_cluster    = var.vc_cluster
-  vc_ds         = var.vc_ds
-  vc_vm_folder  = vsphere_folder.vm.path
-  dns           = var.dns
-  # proxy_hosts = var.proxy_hosts
-  # ntp_servers    = var.ntp_servers
+  source         = "../.."
+  ignition_gen   = var.ignition_gen
+  vc_dc          = var.vc_dc
+  vc_cluster     = var.vc_cluster
+  vc_ds          = var.vc_ds
+  vc_vm_folder   = vsphere_folder.vm.path
+  dns            = var.dns
   bootstrap_ip   = var.bootstrap_ip
   master_nodes   = var.master_nodes
   worker_nodes   = var.worker_nodes
@@ -88,6 +90,11 @@ output "cluster" {
 
 output "kubeadmin_password" {
   value     = module.cluster.kubeadmin_password
+  sensitive = true
+}
+
+output "bootstrap_kubeconfig" {
+  value     = module.cluster.bootstrap_kubeconfig
   sensitive = true
 }
 

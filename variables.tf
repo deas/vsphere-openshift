@@ -30,9 +30,9 @@ variable "cos_template" {
 ## Machine variables
 # Keeping those ignition paths as vars as we might want to delegate this to another module
 
-variable "ignition_path" {
-  type = string
-}
+#variable "ignition_path" {
+#  type = string
+#}
 
 # TODO: Might make sense to condense into single nodes list
 variable "master_nodes" {

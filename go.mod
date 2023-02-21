@@ -1,4 +1,4 @@
-module github.com/deas/ocp4-vsphere
+module github.com/deas/vsphere-openshift
 
 go 1.19
 

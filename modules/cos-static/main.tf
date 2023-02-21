@@ -35,8 +35,9 @@ resource "vsphere_virtual_machine" "vm" {
   enable_disk_uuid            = "true"
   wait_for_guest_net_timeout  = "0"
   wait_for_guest_net_routable = "false"
+  # swap_placement_policy       = "inherit"
   lifecycle {
-    ignore_changes = [extra_config] # Hack to prevent update which appears to mess up the vm
+    ignore_changes = [extra_config /*, swap_placement_policy*/] # Hack to prevent update which appears to mess up the vm
   }
   network_interface {
     network_id   = var.network

@@ -12,11 +12,11 @@ locals {
       attachments  = try(nodes.attachments[i], [])
       ipv4_address = addr }
   ] if nodes != null])
-  networks      = toset(concat([var.master_nodes.network], [for nodes in var.worker_nodes : nodes.network]))
-  dns_address   = join(":", var.dns)
-  ignition_path = data.external.ignition.result.path # var.ignition_path
+  networks    = toset(concat([var.master_nodes.network], [for nodes in var.worker_nodes : nodes.network]))
+  dns_address = join(":", var.dns)
+  # ignition_path = data.external.ignition.result.path # var.ignition_path
   ignition_gen = length(var.ignition_gen) > 0 ? var.ignition_gen : ["sh", "-c", format(<<EOT
-rm -rf *.ign && "%s/generate-configs.sh" && echo '{"path":"'$(pwd)'"}'
+rm -rf *.ign && "%s/tools/generate-configs.sh"}'
 EOT
     , abspath(path.module))
   ]
@@ -71,20 +71,22 @@ data "template_file" "install_config" {
   })
 }
 
-resource "local_file" "install_config" {
-  content         = data.template_file.install_config.rendered
-  file_permission = 0644
-  filename        = "${var.ignition_path}/install-config.yaml"
-}
+#resource "local_file" "install_config" {
+#  content         = data.template_file.install_config.rendered
+#  file_permission = 0644
+#  filename        = "${var.ignition_path}/install-config.yaml"
+#}
 
 #data "local_file" "pull_secret" {
 #  filename = var.ignition_vars.pullSecret
 #}
 
+# When imperative bumps into declarative. It is what it is. Ugh.
 data "external" "ignition" {
-  program     = local.ignition_gen
-  depends_on  = [local_file.install_config]
-  working_dir = var.ignition_path
+  program = local.ignition_gen
+  query = {
+    install_config = data.template_file.install_config.rendered
+  }
 }
 
 module "master" {
@@ -96,15 +98,13 @@ module "master" {
   disk_size        = var.master_nodes.disk_size
   memory           = var.master_nodes.memory
   num_cpu          = var.master_nodes.num_cpu
-  ignition         = file("${local.ignition_path}/master.ign")
+  ignition         = base64decode(data.external.ignition.result["master.ign"])
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
   thin_provisioned = data.vsphere_virtual_machine.template.disks[0].thin_provisioned
   network          = data.vsphere_network.nodes[var.master_nodes.network].id
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
-  cluster_domain   = var.cluster_domain
-  machine_cidr     = var.master_nodes.machine_cidr
   dns_address      = local.dns_address
   gateway          = var.master_nodes.gateway
   ipv4_address     = var.master_nodes.ips[count.index]
@@ -114,7 +114,7 @@ module "master" {
 module "worker" {
   source           = "./modules/cos-static"
   count            = length(local.all_worker_nodes)
-  ignition         = file("${local.ignition_path}/worker.ign")
+  ignition         = base64decode(data.external.ignition.result["worker.ign"])
   name             = "${var.cluster_slug}-wrk-${local.all_worker_nodes[count.index]["slug"]}-${count.index + 1}"
   folder           = var.vc_vm_folder
   datastore        = data.vsphere_datastore.this.id
@@ -129,11 +129,9 @@ module "worker" {
   network          = data.vsphere_network.nodes[local.all_worker_nodes[count.index]["network"]].id
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
   gateway          = local.all_worker_nodes[count.index]["gateway"]
-  machine_cidr     = local.all_worker_nodes[count.index]["machine_cidr"]
   ipv4_address     = local.all_worker_nodes[count.index]["ipv4_address"]
   netmask          = local.all_worker_nodes[count.index]["netmask"]
   dns_address      = local.dns_address
-  cluster_domain   = var.cluster_domain
 }
 
 module "bootstrap" {
@@ -145,15 +143,13 @@ module "bootstrap" {
   disk_size        = var.bootstrap_disk_size
   memory           = var.bootstrap_memory
   num_cpu          = var.bootstrap_num_cpu
-  ignition         = file("${local.ignition_path}/bootstrap.ign")
+  ignition         = base64decode(data.external.ignition.result["bootstrap.ign"])
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   guest_id         = data.vsphere_virtual_machine.template.guest_id
   template         = data.vsphere_virtual_machine.template.id
   thin_provisioned = data.vsphere_virtual_machine.template.disks[0].thin_provisioned
   network          = data.vsphere_network.nodes[var.master_nodes.network].id # TODO: Should not borrow from master?
   adapter_type     = data.vsphere_virtual_machine.template.network_interface_types[0]
-  cluster_domain   = var.cluster_domain
-  machine_cidr     = var.master_nodes.machine_cidr
   dns_address      = local.dns_address
   gateway          = var.master_nodes.gateway
   ipv4_address     = var.bootstrap_ip
@@ -169,7 +165,12 @@ resource "vsphere_folder" "folder" {
 */
 
 output "kubeadmin_password" {
-  value     = file("${data.external.ignition.result.path}/auth/kubeadmin-password")
+  value     = base64decode(data.external.ignition.result["auth/kubeadmin-password"])
+  sensitive = true
+}
+
+output "bootstrap_kubeconfig" {
+  value     = base64decode(data.external.ignition.result["auth/kubeconfig"])
   sensitive = true
 }
 

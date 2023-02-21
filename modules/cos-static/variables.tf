@@ -7,10 +7,10 @@ variable "ignition" {
   default = ""
 }
 
-variable "ignition_url" {
-  type    = string
-  default = ""
-}
+#variable "ignition_url" {
+#  type    = string
+#  default = ""
+#}
 
 variable "resource_pool_id" {
   type = string
@@ -56,13 +56,13 @@ variable "num_cpu" {
   type = string
 }
 
-variable "cluster_domain" {
-  type = string
-}
+#variable "cluster_domain" {
+#  type = string
+#}
 
-variable "machine_cidr" {
-  type = string
-}
+#variable "machine_cidr" {
+#  type = string
+#}
 
 variable "gateway" {
   type = string

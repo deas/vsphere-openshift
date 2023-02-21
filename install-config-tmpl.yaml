@@ -36,3 +36,8 @@ fips: false
 pullSecret: '${pullSecret}'
 # The sshKey configuration setting contains the key in the ~/.ssh/id_rsa.pub file required to access the control plane nodes and worker nodes. Typically, this key is from the provisioner node.
 sshKey: '${sshKey}'
+# https://docs.openshift.com/container-platform/4.10/rest_api/machine_apis/controllerconfig-machineconfiguration-openshift-io-v1.html
+#additionalTrustBundle: |
+#  -----BEGIN CERTIFICATE-----
+#  ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+#  -----END CERTIFICATE-----

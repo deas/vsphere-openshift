@@ -7,10 +7,10 @@ variable "ignition" {
   default = ""
 }
 
-variable "ignition_url" {
-  type    = string
-  default = ""
-}
+#variable "ignition_url" {
+#  type    = string
+#  default = ""
+#}
 
 variable "resource_pool_id" {
   type = string
@@ -49,10 +49,6 @@ variable "thin_provisioned" {
 }
 
 variable "disk_size" {
-  type = string
-}
-
-variable "domain_name" {
   type = string
 }
 

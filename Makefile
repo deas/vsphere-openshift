@@ -41,9 +41,10 @@ rm -rf $$TMP_DIR ;\
 }
 endef
 
-.PHONY: vet
-vet: ## Run go vet against code.
+.PHONY: lint
+lint: ## Run go/terraform linter
 	go vet ./...
+	tflint --recursive
 
 .PHONY: vcsim
 vcsim: $(VCSIM) ## Download vcsim locally if necessary.

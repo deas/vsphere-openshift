@@ -1,6 +1,6 @@
 # VSphere OpenShift - Reusable UPI Tooling
 
-This repo aims at providing tools helping with UPI of OpenShift/OKD on VSphere.
+This repo aims at providing tools helping with terraform based UPI of OpenShift/OKD on VSphere.
 
 It is based on [`ironicbadger/ocp4`](https://github.com/ironicbadger/ocp4). You may want to check the writup on [openshift.com](https://www.openshift.com/blog/how-to-install-openshift-4.6-on-vmware-with-upi).
 
