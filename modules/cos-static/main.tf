@@ -24,12 +24,12 @@ data "ignition_config" "vm" {
 
 resource "vsphere_virtual_machine" "vm" {
 
-  name                        = var.name
-  resource_pool_id            = var.resource_pool_id
-  datastore_id                = var.datastore
-  num_cpus                    = var.num_cpu
-  memory                      = var.memory
-  memory_reservation          = var.memory
+  name             = var.name
+  resource_pool_id = var.resource_pool_id
+  datastore_id     = var.datastore
+  num_cpus         = var.num_cpu
+  memory           = var.memory
+  # memory_reservation          = var.memory
   guest_id                    = var.guest_id
   folder                      = var.folder
   enable_disk_uuid            = "true"
