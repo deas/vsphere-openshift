@@ -30,7 +30,6 @@ openshift-install create ignition-configs --log-level debug  > openshift-install
 
 # echo '{"path": "'$dir'"}'
 
-dir=$(pwd)/openshift-sandbox
 cat <<EOF
 {
   "bootstrap.ign" : "$(base64 -w 0 <"$dir/bootstrap.ign")",
