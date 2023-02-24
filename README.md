@@ -24,7 +24,6 @@ The main terraform module is at the root of the repository. It covers a single c
 | cos\_template | n/a | `string` | n/a | yes |
 | dns | n/a | `list(string)` | n/a | yes |
 | ignition\_gen | n/a | `list(string)` | `[]` | no |
-| ignition\_path | n/a | `string` | n/a | yes |
 | ignition\_vars | n/a | <pre>object({<br>    vc            = string<br>    vc_username   = string<br>    vc_password   = string<br>    vc_datacenter = string<br>    # vc_defaultDatastore = var.vc_ds<br>    pullSecret = optional(string) #, "") # file("${path.module}/pull-secret-fake.json"))<br>    # data.local_file.pull_secret.content<br>    sshKey     = string<br>    apiVIP     = optional(string, "") # TODO: Check<br>    ingressVIP = optional(string, "") # TODO: Check<br>    httpsProxy = optional(string, "")<br>    noProxy    = optional(string, "")<br><br>  })</pre> | n/a | yes |
 | master\_nodes | TODO: Might make sense to condense into single nodes list | <pre>object({<br>    disk_size    = number<br>    memory       = number<br>    num_cpu      = number<br>    ips          = list(string)<br>    machine_cidr = string<br>    netmask      = string<br>    gateway      = string<br>    network      = string<br>  })</pre> | `null` | no |
 | ntp\_servers | n/a | `list(string)` | `[]` | no |
@@ -39,6 +38,7 @@ The main terraform module is at the root of the repository. It covers a single c
 | Name | Description |
 |------|-------------|
 | api\_endpoint | n/a |
+| bootstrap\_kubeconfig | n/a |
 | bu | terraform output -json cluster \| jq '.bu["99-master-chrony.bu"]' -r |
 | ingress\_domain | n/a |
 | kubeadmin\_password | n/a |

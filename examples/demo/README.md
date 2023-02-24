@@ -22,28 +22,18 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| bootstrap\_complete | n/a | `string` | `"false"` | no |
-| bootstrap\_ignition\_path | n/a | `string` | `"openshift/bootstrap.ign"` | no |
 | bootstrap\_ip | n/a | `string` | `""` | no |
 | cluster\_domain | n/a | `string` | n/a | yes |
 | cluster\_slug | n/a | `string` | n/a | yes |
-| cos\_template | n/a | `string` | n/a | yes |
+| cos\_template | ############### # VMware vars - unlikely to need to change between releases of OCP | `string` | n/a | yes |
 | dns | n/a | `list(string)` | n/a | yes |
-| https\_proxy | n/a | `string` | `""` | no |
-| ignition\_gen | n/a | `list(string)` | <pre>[<br>  "sh",<br>  "-c",<br>  "rm -rf *.ign && ../../../generate-configs.sh && echo '{\"path\":\"openshift\"}'"<br>]</pre> | no |
-| loadbalancer\_ip | n/a | `string` | `""` | no |
-| master\_ignition\_path | n/a | `string` | `"openshift/master.ign"` | no |
+| ignition\_gen | n/a | `list(string)` | <pre>[<br>  "sh",<br>  "-c",<br>  "rm -rf *.ign && ../../../tools/generate-configs.sh"<br>]</pre> | no |
 | master\_nodes | n/a | <pre>object({<br>    disk_size    = number<br>    memory       = number<br>    num_cpu      = number<br>    machine_cidr = string<br>    netmask      = string<br>    gateway      = string<br>    network      = string<br>    ips          = list(string)<br>  })</pre> | `null` | no |
-| no\_proxy | n/a | `string` | `""` | no |
 | ntp\_servers | n/a | `list(string)` | n/a | yes |
-| openshift\_gen | n/a | `string` | `"cd openshift && ../../../generate-configs.sh"` | no |
-| proxy\_hosts | n/a | `list(string)` | n/a | yes |
-| pull\_secret | n/a | `string` | `"../../pull-secret-fake.json"` | no |
 | vc\_cluster | n/a | `string` | n/a | yes |
 | vc\_dc | n/a | `string` | n/a | yes |
 | vc\_ds | n/a | `string` | n/a | yes |
 | vm\_folder | n/a | `string` | n/a | yes |
-| worker\_ignition\_path | n/a | `string` | `"openshift/worker.ign"` | no |
 | worker\_nodes | n/a | <pre>list(object({<br>    disk_size    = number<br>    memory       = number<br>    num_cpu      = number<br>    slug         = string<br>    machine_cidr = string<br>    netmask      = string<br>    gateway      = string<br>    network      = string<br>    attachments  = list(list(map(string)))<br>    ips          = list(string)<br>  }))</pre> | `null` | no |
 
 ## Outputs
@@ -51,6 +41,7 @@
 | Name | Description |
 |------|-------------|
 | api\_endpoint | n/a |
+| bootstrap\_kubeconfig | n/a |
 | cluster | n/a |
 | ingress\_domain | n/a |
 | kubeadmin\_password | n/a |
