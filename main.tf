@@ -16,7 +16,7 @@ locals {
   dns_address = join(":", var.dns)
   # ignition_path = data.external.ignition.result.path # var.ignition_path
   ignition_gen = length(var.ignition_gen) > 0 ? var.ignition_gen : ["sh", "-c", format(<<EOT
-rm -rf *.ign && "%s/tools/generate-configs.sh"}'
+rm -rf *.ign && "%s/tools/generate-configs.sh"
 EOT
     , abspath(path.module))
   ]
