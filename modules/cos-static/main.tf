@@ -85,4 +85,15 @@ resource "vsphere_virtual_machine" "vm" {
     # https://www.man7.org/linux/man-pages/man7/dracut.cmdline.7.html
     "guestinfo.afterburn.initrd.network-kargs" = "ip=${var.ipv4_address}::${var.gateway}:${var.netmask}:${var.name}:ens192:off:${var.dns_address}"
   }
+
+  // Advanced options
+  hv_mode                          = var.hv_mode
+  ept_rvi_mode                     = var.ept_rvi_mode
+  nested_hv_enabled                = var.nested_hv_enabled
+  enable_logging                   = var.enable_logging
+  cpu_performance_counters_enabled = var.cpu_performance_counters_enabled
+  swap_placement_policy            = var.swap_placement_policy
+  latency_sensitivity              = var.latency_sensitivity
+  shutdown_wait_timeout            = var.shutdown_wait_timeout
+  force_power_off                  = var.force_power_off
 }

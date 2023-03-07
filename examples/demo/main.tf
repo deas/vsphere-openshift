@@ -50,6 +50,7 @@ module "cluster" {
   cluster_slug   = var.cluster_slug
   cluster_domain = var.cluster_domain
   ntp_servers    = var.ntp_servers
+  enable_logging = true
   ignition_vars = {
     vc            = "127.0.0.1"
     vc_username   = "user"

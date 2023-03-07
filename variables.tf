@@ -120,6 +120,51 @@ variable "ntp_servers" {
   default = []
 }
 
+variable "hv_mode" {
+  type    = string
+  default = null
+}
+
+variable "ept_rvi_mode" {
+  type    = string
+  default = null
+}
+
+variable "nested_hv_enabled" {
+  type    = bool
+  default = null
+}
+
+variable "enable_logging" {
+  type    = bool
+  default = null
+}
+
+variable "cpu_performance_counters_enabled" {
+  type    = bool
+  default = null
+}
+
+variable "swap_placement_policy" {
+  type    = string
+  default = null
+}
+
+variable "latency_sensitivity" {
+  type    = string
+  default = null
+}
+
+variable "shutdown_wait_timeout" {
+  type    = string
+  default = null
+}
+
+variable "force_power_off" {
+  type    = bool
+  default = null
+}
+
 #variable "proxy_hosts" {
 #  type = list(string)
 #}
