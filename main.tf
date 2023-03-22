@@ -203,7 +203,7 @@ output "bootstrap_kubeconfig" {
 }
 
 output "metadata" {
-  value = jsondecode(base64decode(data.external.ignition.result["metadata.json"]))
+  value     = jsondecode(base64decode(data.external.ignition.result["metadata.json"]))
   sensitive = true
 }
 
