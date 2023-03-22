@@ -13,7 +13,7 @@ echo 'test' > auth/kubeadmin-password
 touch bootstrap.ign
 touch master.ign
 touch worker.ign
-touch metadata.json
+echo '{"clusterName":"slug","clusterID":"id","infraID":"slug-f2w9p","vsphere":{"vCenter":"xxx","username":"xxx","password":"xxx"}}' > metadata.json
 
 # echo '{"path": "'$dir'"}'
 

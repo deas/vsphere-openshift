@@ -202,6 +202,11 @@ output "bootstrap_kubeconfig" {
   sensitive = true
 }
 
+output "metadata" {
+  value = jsondecode(base64decode(data.external.ignition.result["metadata.json"]))
+  sensitive = true
+}
+
 output "api_endpoint" {
   value = format("https://api.%s.%s:6443", var.cluster_slug, var.cluster_domain)
 }
