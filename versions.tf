@@ -6,9 +6,11 @@ terraform {
   required_providers {
     external = {
       version = "~> 2.2"
+      source  = "hashicorp/external"
     }
     template = {
       version = "~> 2.2"
+      source  = "hashicorp/template"
     }
     local = {
       version = "~> 2.2"

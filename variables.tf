@@ -60,7 +60,6 @@ variable "worker_nodes" {
     machine_cidr = string
     netmask      = string
     gateway      = string
-    network      = string
     attachments  = list(list(map(string)))
   }))
   default = null
