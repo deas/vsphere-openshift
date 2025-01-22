@@ -2,7 +2,9 @@
 
 set -e
 
-GITHUB_REPO="https://github.com/okd-project/okd"
+# # The follwing is supposed to be temporary for scos transition
+# GITHUB_REPO="https://github.com/okd-project/okd-scos"
+: ${GITHUB_REPO:="https://github.com/okd-project/okd"}
 MIRROR_ROOT="${GITHUB_REPO}/releases/download"
 OS=$(uname -s)
 
@@ -15,7 +17,7 @@ else
   exit 99
 fi
 
-ARCH=$(uname -m)
+# ARCH=$(uname -m)
 
 #if [ "${ARCH}" == 'x86_64' ]; then
 #  # MIRROR_PATH='/pub/openshift-v4/x86_64/clients'
@@ -32,22 +34,33 @@ ARCH=$(uname -m)
 
 : "${BIN_PATH:=$(pwd)/bin}"
 
+list_all_versions() {
+  git ls-remote --tags --refs "$GITHUB_REPO" |
+    grep -o 'refs/tags/.*' | cut -d/ -f3- |
+    sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+}
+
 run() {
 
   case "$1" in
-    --version)
-      version "$2"
-      ;;
-    --cleanup)
-      remove_old_ver
-      ;;
-    --help)
-      show_help
-      exit 0
-      ;;
-    *)
-      show_help
-      exit 0
+  --version)
+    version "$2"
+    ;;
+  --cleanup)
+    remove_old_ver
+    ;;
+  --help)
+    show_help
+    exit 0
+    ;;
+  --list)
+    list_all_versions
+    exit 0
+    ;;
+  *)
+    show_help
+    exit 0
+    ;;
   esac
 
 }
@@ -109,7 +122,6 @@ version() {
 
 }
 
-
 extract() {
 
   mkdir -p ${BIN_PATH}
@@ -127,80 +139,77 @@ cleanup() {
 
 }
 
-uninstall(){
+uninstall() {
 
-	if ls ${BIN_PATH}/oc 1> /dev/null 2>&1 && ls ${BIN_PATH}/openshift-install 1> /dev/null 2>&1 && ls ${BIN_PATH}/kubectl 1> /dev/null 2>&1
-  then
-  read -rp "Delete the following files?
+  if ls ${BIN_PATH}/oc 1>/dev/null 2>&1 && ls ${BIN_PATH}/openshift-install 1>/dev/null 2>&1 && ls ${BIN_PATH}/kubectl 1>/dev/null 2>&1; then
+    read -rp "Delete the following files?
 $(echo -e "\n")
 $(for i in oc kubectl openshift-install; do ls -1 ${BIN_PATH}/$i 2>/dev/null; done)
 $(for i in oc kubectl openshift-install; do ls -1 ${BIN_PATH}/$i*bak 2>/dev/null; done)
 $(echo -e "\nY/N? ")"
 
-  if [[ $REPLY =~ ^[Yy]$ ]]
-  then
-    for i in oc kubectl openshift-install; do rm -f ${BIN_PATH}/$i*bak 2>/dev/null; done
-    for i in oc kubectl openshift-install; do rm -f ${BIN_PATH}/$i 2>/dev/null; done
-    exit 0
-  elif [[ $REPLY =~ ^[Nn]$ ]]
-  then
-    exit 0
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      for i in oc kubectl openshift-install; do rm -f ${BIN_PATH}/$i*bak 2>/dev/null; done
+      for i in oc kubectl openshift-install; do rm -f ${BIN_PATH}/$i 2>/dev/null; done
+      exit 0
+    elif [[ $REPLY =~ ^[Nn]$ ]]; then
+      exit 0
+    else
+      echo "Invalid response."
+      exit 1
+    fi
   else
-    echo "Invalid response."
-    exit 1
+    echo "No versions found."
+    exit 0
   fi
-else
-  echo "No versions found."
-  exit 0
-fi
 
 }
 
 show_ver() {
 
   if which oc &>/dev/null; then
-      echo -e "\noc version: $(oc version 2>/dev/null | grep Client | sed -e 's/Client Version: //')"
+    echo -e "\noc version: $(oc version 2>/dev/null | grep Client | sed -e 's/Client Version: //')"
   else
-      echo "Error getting oc version. Please rerun script."
+    echo "Error getting oc version. Please rerun script."
   fi
 
   if which kubectl &>/dev/null; then
-      echo -e "\nkubectl version: $(kubectl version --client | grep -o "GitVersion:.*" | cut -d, -f1)"
+    echo -e "\nkubectl version: $(kubectl version --client | grep -o "GitVersion:.*" | cut -d, -f1)"
   else
-      echo "Error getting kubectl version. Please rerun script."
+    echo "Error getting kubectl version. Please rerun script."
   fi
 
   if which openshift-install &>/dev/null; then
-      echo -e "\nopenshift-install version: $(openshift-install version | grep openshift-install | sed -e 's/openshift-install //')"
+    echo -e "\nopenshift-install version: $(openshift-install version | grep openshift-install | sed -e 's/openshift-install //')"
   else
-      echo "Error getting openshift-install version. Please rerun script."
+    echo "Error getting openshift-install version. Please rerun script."
   fi
 
 }
 
-download(){
+download() {
+  set -e
+  echo -n "Downloading $1:    "
+  wget --progress=dot "$1" -O "/tmp/openshift-client-${OS}.tar.gz" # 2>&1 |
+  #  grep --line-buffered "%" |
+  #  sed -e "s,\.,,g" |
+  #  awk '{printf("\b\b\b\b%4s", $2)}'
+  #echo -ne "\b\b\b\b"
+  # echo " Download Complete."
 
-echo -n "Downloading $1:    "
-wget --progress=dot "$1" -O "/tmp/openshift-client-${OS}.tar.gz" 2>&1 | \
-    grep --line-buffered "%" | \
-    sed -e "s,\.,,g" | \
-    awk '{printf("\b\b\b\b%4s", $2)}'
-echo -ne "\b\b\b\b"
-echo " Download Complete."
-
-echo -n "Downloading $2:    "
-wget --progress=dot "$2" -O "/tmp/openshift-install-${OS}.tar.gz" 2>&1 | \
-    grep --line-buffered "%" | \
-    sed -e "s,\.,,g" | \
-    awk '{printf("\b\b\b\b%4s", $2)}'
-echo -ne "\b\b\b\b"
-echo " Download Complete."
+  echo -n "Downloading $2:    "
+  wget --progress=dot "$2" -O "/tmp/openshift-install-${OS}.tar.gz" # 2>&1 |
+  #  grep --line-buffered "%" |
+  #  sed -e "s,\.,,g" |
+  #  awk '{printf("\b\b\b\b%4s", $2)}'
+  #echo -ne "\b\b\b\b"
+  # echo " Download Complete."
 
 }
 
 show_help() {
 
-    cat  << ENDHELP
+  cat <<ENDHELP
 USAGE: $(basename "$0")
 install-okd-tools is a small script that will download the latest, stable, fast, nightly,
 or specified version of the oc command line tools, kubectl, and openshift-install.
@@ -211,12 +220,15 @@ Options:
       Example: install-okd-tools --version 4.4.10
     --cleanup: This deleted all backed up version of oc, kubectl, and openshift-install
       Example: install-okd-tools --cleanup
-  --uninstall: This will delete all copies of oc, kubectl, and openshift-install including backups
+    --uninstall: This will delete all copies of oc, kubectl, and openshift-install including backups
       Example: install-okd-tools --uninstall
+    --list: List all versions available
     --help:    Shows this help message
 
 You may override the binary path by setting it in BIN_PATH environment variable
-- BIN_PATH: Where to save the oc tools. Default: $(pwd)/bin
+- BIN_PATH: Where to save the oc tools. Default: $(pwd)/binary
+
+You may also override the GITHUB_REPO environment variable. Current value: ${GITHUB_REPO}
 
 ENDHELP
 
